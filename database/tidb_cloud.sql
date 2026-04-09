@@ -7,6 +7,7 @@
 -- Autores: Bundy, Herrera, De León — ITSE BD1 2026
 -- =========================================================
 
+USE panalogis_db;
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ─── TABLAS MAESTRAS ──────────────────────────────────────────────────────────
