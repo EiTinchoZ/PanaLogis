@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, btn_eliminar, campo %}
+
+{% block title %}{{ orden.numero_orden }}{% endblock %}
+{% block page_title %}{{ orden.numero_orden }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('ordenes.listar_ordenes') }}">Órdenes</a>
+  <span class="topbar-sep">/</span>
+  <span>{{ orden.numero_orden }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('ordenes.editar_orden', orden_id=orden.id_orden) }}" class="btn btn-secondary btn-sm">Editar</a>
+  {{ btn_eliminar(url_for('ordenes.eliminar_orden', orden_id=orden.id_orden)) }}
+{% endblock %}
+
+{% block content %}
+
+<!-- Fila principal -->
+<div class="grid grid-2" style="margin-bottom:20px; align-items:start;">
+
+  <!-- Datos de la orden -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Datos de la orden</div>
+      {{ badge_estado(orden.estado) }}
+    </div>
+    <div class="card-body">
+      {{ campo('N° Orden', orden.numero_orden, mono=true) }}
+      {{ campo('Fecha programada', orden.fecha_programada.strftime('%d/%m/%Y') if orden.fecha_programada else '—') }}
+      {{ campo('Fecha creación', orden.fecha_creacion.strftime('%d/%m/%Y %H:%M') if orden.fecha_creacion else '—') }}
+      {{ campo('Cliente', orden.cliente) }}
+      {{ campo('Ruta', orden.ruta) }}
+      {{ campo('Origen', orden.origen) }}
+      {{ campo('Destino', orden.destino) }}
+      {{ campo('Tipo de carga', orden.tipo_carga) }}
+      {{ campo('Peso', "{:,.2f} kg".format(orden.peso_kg | float)) }}
+      {% if orden.descripcion %}
+      {{ campo('Descripción', orden.descripcion) }}
+      {% endif %}
+      {% if orden.observaciones %}
+      {{ campo('Observaciones', orden.observaciones) }}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Vehículo + Conductor + Factura -->
+  <div style="display:flex; flex-direction:column; gap:16px;">
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Asignación</div></div>
+      <div class="card-body">
+        {{ campo('Vehículo', orden.placa ~ ' — ' ~ orden.marca ~ ' ' ~ orden.modelo) }}
+        {{ campo('Conductor', orden.conductor) }}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Factura</div>
+        {% if factura %}
+          {{ badge_estado(factura.estado) }}
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if factura %}
+          {{ campo('N° Factura', factura.numero_factura, mono=true) }}
+          {{ campo('Fecha emisión', factura.fecha_emision.strftime('%d/%m/%Y') if factura.fecha_emision else '—') }}
+          {{ campo('Subtotal', "$" ~ "{:,.2f}".format(factura.subtotal | float)) }}
+          {{ campo('ITBMS', "$" ~ "{:,.2f}".format(factura.impuesto | float)) }}
+          {{ campo('Total', "$" ~ "{:,.2f}".format(factura.total | float)) }}
+          {% if factura.fecha_pago %}
+          {{ campo('Fecha pago', factura.fecha_pago.strftime('%d/%m/%Y')) }}
+          {% endif %}
+          <div style="margin-top:12px;">
+            <a href="{{ url_for('facturas.detalle_factura', factura_id=factura.id_factura) }}" class="btn btn-ghost btn-sm">Ver factura</a>
+          </div>
+        {% else %}
+          <p class="text-sm text-steel">La factura se generará al entregar la orden.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bitácora -->
+{% if bitacora %}
+<div class="card">
+  <div class="card-header"><div class="card-title">Bitácora de cambios</div></div>
+  <div class="card-body" style="padding:0;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Operación</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bitacora %}
+        <tr>
+          <td class="tabular text-sm">{{ b.fecha_operacion.strftime('%d/%m/%Y %H:%M') if b.fecha_operacion else '—' }}</td>
+          <td class="text-sm font-medium">{{ b.operacion }}</td>
+          <td class="text-sm text-steel">{{ b.descripcion or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

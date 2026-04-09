@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if modo == 'editar' else 'Nuevo' }} Conductor{% endblock %}
+{% block page_title %}{{ 'Editar conductor' if modo == 'editar' else 'Nuevo conductor' }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('conductores.listar_conductores') }}">Conductores</a>
+  {% if modo == 'editar' %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('conductores.detalle_conductor', conductor_id=conductor_id) }}">{{ conductor.cedula }}</a>
+  {% endif %}
+  <span class="topbar-sep">/</span>
+  <span>{{ 'Editar' if modo == 'editar' else 'Nuevo' }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:720px;">
+  <div class="card-header">
+    <div class="card-title">Datos del conductor</div>
+  </div>
+  <div class="card-body">
+    <form method="POST"
+          action="{{ url_for('conductores.editar_conductor', conductor_id=conductor_id) if modo == 'editar' else url_for('conductores.nuevo_conductor') }}">
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Cédula <span class="text-amber">*</span></label>
+          <input type="text" name="cedula" class="form-control" value="{{ conductor.cedula }}" placeholder="8-123-4567" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado <span class="text-amber">*</span></label>
+          <select name="estado" class="form-control" required>
+            {% for est in estados %}
+            <option value="{{ est }}" {% if conductor.estado == est %}selected{% endif %}>{{ est | title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Nombre <span class="text-amber">*</span></label>
+          <input type="text" name="nombre" class="form-control" value="{{ conductor.nombre }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellido <span class="text-amber">*</span></label>
+          <input type="text" name="apellido" class="form-control" value="{{ conductor.apellido }}" required>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" name="telefono" class="form-control" value="{{ conductor.telefono }}" placeholder="6000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="{{ conductor.email }}" placeholder="conductor@ejemplo.com">
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">N° Licencia <span class="text-amber">*</span></label>
+          <input type="text" name="licencia" class="form-control" value="{{ conductor.licencia }}" placeholder="LIC-0001" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoría <span class="text-amber">*</span></label>
+          <input type="text" name="categoria_licencia" class="form-control" value="{{ conductor.categoria_licencia }}" placeholder="C, D, E..." required>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label">Vencimiento de licencia <span class="text-amber">*</span></label>
+        <input type="date" name="vences_licencia" class="form-control" value="{{ conductor.vences_licencia }}" required>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">
+          {{ 'Guardar cambios' if modo == 'editar' else 'Registrar conductor' }}
+        </button>
+        <a href="{{ url_for('conductores.detalle_conductor', conductor_id=conductor_id) if modo == 'editar' else url_for('conductores.listar_conductores') }}"
+           class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

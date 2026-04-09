@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, btn_eliminar, campo %}
+
+{% block title %}{{ cliente.razon_social }}{% endblock %}
+{% block page_title %}{{ cliente.razon_social }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('clientes.listar_clientes') }}">Clientes</a>
+  <span class="topbar-sep">/</span>
+  <span>{{ cliente.ruc }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('clientes.editar_cliente', cliente_id=cliente.id_cliente) }}" class="btn btn-secondary btn-sm">Editar</a>
+  {{ btn_eliminar(url_for('clientes.eliminar_cliente', cliente_id=cliente.id_cliente)) }}
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="margin-bottom:24px; align-items:start;">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Datos del cliente</div>
+      {{ badge_estado(cliente.estado) }}
+    </div>
+    <div class="card-body">
+      {{ campo('RUC', cliente.ruc, mono=true) }}
+      {{ campo('Razón social', cliente.razon_social) }}
+      {{ campo('Contacto', cliente.contacto_nombre) }}
+      {{ campo('Teléfono', cliente.contacto_tel) }}
+      {{ campo('Email', cliente.contacto_email) }}
+      {{ campo('Dirección', cliente.direccion) }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Historial de servicios</div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if historial %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Orden</th>
+            <th>Ruta</th>
+            <th>Fecha</th>
+            <th class="text-right">Facturado</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in historial %}
+          <tr>
+            <td class="tabular text-sm font-medium">
+              <a href="{{ url_for('ordenes.detalle_orden', orden_id=o.id_orden) }}" class="text-amber">{{ o.numero_orden }}</a>
+            </td>
+            <td class="text-sm">{{ o.ruta }}</td>
+            <td class="tabular text-sm">{{ o.fecha_programada.strftime('%d/%m/%Y') if o.fecha_programada else '—' }}</td>
+            <td class="tabular text-sm text-right">
+              {% if o.total_facturado %} ${{ "{:,.2f}".format(o.total_facturado | float) }} {% else %} — {% endif %}
+            </td>
+            <td>{{ badge_estado(o.estado) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:24px 20px; text-align:center;" class="text-sm text-steel">Sin órdenes registradas.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

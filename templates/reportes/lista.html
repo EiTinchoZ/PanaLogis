@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, empty_table %}
+
+{% block title %}Reportes{% endblock %}
+{% block page_title %}Panel de Reportes{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Reportes</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <form method="GET" action="{{ url_for('reportes.listar_reportes') }}" class="reportes-filter-bar">
+    <select name="mes" class="form-select reportes-filter-input">
+      {% set meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'] %}
+      {% for i in range(1,13) %}
+      <option value="{{ i }}" {% if filtros.mes == i %}selected{% endif %}>{{ meses[i-1] }}</option>
+      {% endfor %}
+    </select>
+    <input type="number" name="anio" class="form-input reportes-filter-input reportes-filter-year"
+           value="{{ filtros.anio }}" min="2020" max="2030">
+    <button type="submit" class="btn btn-secondary btn-sm">Filtrar</button>
+  </form>
+{% endblock %}
+
+{% block content %}
+{% set total_facturas_mes = (facturacion_mensual[0].total_facturas if facturacion_mensual else 0) %}
+{% set total_cobrado_mes = (facturacion_mensual[0].cobrado if facturacion_mensual else 0) %}
+{% set total_porcobrar_mes = (facturacion_mensual[0].por_cobrar if facturacion_mensual else 0) %}
+{% set ns = namespace(activos=0, mantenimiento=0, inactivos=0) %}
+{% for v in estado_flota %}
+  {% if v.estado == 'ACTIVO' %}
+    {% set ns.activos = ns.activos + 1 %}
+  {% elif v.estado == 'MANTENIMIENTO' %}
+    {% set ns.mantenimiento = ns.mantenimiento + 1 %}
+  {% elif v.estado == 'INACTIVO' %}
+    {% set ns.inactivos = ns.inactivos + 1 %}
+  {% endif %}
+{% endfor %}
+{% set total_flota_reportes = estado_flota|length if estado_flota else 1 %}
+
+<section class="reportes-hero reveal">
+  <div class="reportes-summary-grid">
+    <div class="reportes-stat reveal">
+      <div class="reportes-stat-label">Vehículos monitoreados</div>
+      <div class="reportes-stat-value" data-countup="{{ estado_flota|length }}">0</div>
+      <div class="reportes-stat-sub">Estado actual de la flota</div>
+    </div>
+    <div class="reportes-stat reveal">
+      <div class="reportes-stat-label">Conductores libres</div>
+      <div class="reportes-stat-value" data-countup="{{ conductores_disponibles|length }}">0</div>
+      <div class="reportes-stat-sub">Disponibles para asignación</div>
+    </div>
+    <div class="reportes-stat reveal">
+      <div class="reportes-stat-label">Facturas válidas del mes</div>
+      <div class="reportes-stat-value" data-countup="{{ total_facturas_mes }}">0</div>
+      <div class="reportes-stat-sub">Excluye facturas anuladas</div>
+    </div>
+    <div class="reportes-stat reveal">
+      <div class="reportes-stat-label">Cobrado</div>
+      <div class="reportes-stat-money">${{ "{:,.2f}".format((total_cobrado_mes or 0)|float) }}</div>
+      <div class="reportes-stat-sub">Por cobrar: ${{ "{:,.2f}".format((total_porcobrar_mes or 0)|float) }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="reportes-visual-grid">
+  <div class="card reveal">
+    <div class="card-header">
+      <div class="card-title">Distribución de flota</div>
+      <span class="text-sm text-steel">Lectura rápida por estado</span>
+    </div>
+    <div class="card-body">
+      <div class="reportes-donut-wrap">
+        <div
+          class="reportes-donut"
+          style="--pct-activos: {{ ((ns.activos / total_flota_reportes) * 100)|round }}; --pct-mant: {{ ((ns.mantenimiento / total_flota_reportes) * 100)|round }};"
+        >
+          <div class="reportes-donut-center">
+            <strong class="tabular">{{ estado_flota|length }}</strong>
+            <span>Unidades</span>
+          </div>
+        </div>
+        <div class="reportes-donut-legend">
+          <div><span class="legend-dot legend-dot--white"></span>Activos {{ ns.activos }}</div>
+          <div><span class="legend-dot legend-dot--red"></span>Mantenimiento {{ ns.mantenimiento }}</div>
+          <div><span class="legend-dot legend-dot--gray"></span>Inactivos {{ ns.inactivos }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header">
+      <div class="card-title">Balance del período</div>
+      <span class="text-sm text-steel">{{ filtros.anio }} / {{ ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][filtros.mes - 1] }}</span>
+    </div>
+    <div class="card-body">
+      {% set balance_total = ((total_cobrado_mes or 0)|float + (total_porcobrar_mes or 0)|float) if (((total_cobrado_mes or 0)|float + (total_porcobrar_mes or 0)|float)) else 1 %}
+      <div class="finance-balance">
+        <div class="finance-balance-row">
+          <div class="finance-balance-copy">
+            <span>Cobrado</span>
+            <strong>${{ "{:,.2f}".format((total_cobrado_mes or 0)|float) }}</strong>
+          </div>
+          <div class="finance-balance-bar">
+            <span class="finance-chip-fill finance-chip-fill--green progress-fill" data-width="{{ (((total_cobrado_mes or 0)|float / balance_total) * 100)|round }}"></span>
+          </div>
+        </div>
+        <div class="finance-balance-row">
+          <div class="finance-balance-copy">
+            <span>Por cobrar</span>
+            <strong>${{ "{:,.2f}".format((total_porcobrar_mes or 0)|float) }}</strong>
+          </div>
+          <div class="finance-balance-bar">
+            <span class="finance-chip-fill finance-chip-fill--amber progress-fill" data-width="{{ (((total_porcobrar_mes or 0)|float / balance_total) * 100)|round }}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="card reveal" style="margin-bottom:20px;">
+  <div class="card-header">
+    <div class="card-title">Estado actual de la flota</div>
+    <span class="text-sm text-steel">{{ estado_flota | length }} vehículos</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if estado_flota %}
+    <table class="table">
+      <thead>
+        <tr><th>Placa</th><th>Tipo</th><th>Marca / Modelo</th><th class="text-right">Km</th><th>Estado</th></tr>
+      </thead>
+      <tbody>
+        {% for v in estado_flota %}
+        <tr>
+          <td class="tabular text-sm font-medium">{{ v.placa }}</td>
+          <td class="text-sm">{{ v.tipo_vehiculo }}</td>
+          <td class="text-sm">{{ v.marca }} {{ v.modelo }}</td>
+          <td class="tabular text-sm text-right">{{ "{:,.0f}".format(v.kilometraje | float) }}</td>
+          <td>{{ badge_estado(v.estado) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}{{ empty_table('Sin datos de flota.') }}{% endif %}
+  </div>
+</div>
+
+<div class="card reveal" style="margin-bottom:20px;">
+  <div class="card-header">
+    <div class="card-title">Conductores disponibles</div>
+    <span class="text-sm text-steel">Sin orden activa en este momento</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if conductores_disponibles %}
+    <table class="table">
+      <thead>
+        <tr><th>Cédula</th><th>Conductor</th><th>Categoría</th><th>Vence licencia</th></tr>
+      </thead>
+      <tbody>
+        {% for c in conductores_disponibles %}
+        <tr>
+          <td class="tabular text-sm">{{ c.cedula }}</td>
+          <td class="text-sm font-medium">{{ c.conductor }}</td>
+          <td class="text-sm">{{ c.categoria_licencia }}</td>
+          <td class="tabular text-sm">{{ c.vences_licencia.strftime('%d/%m/%Y') if c.vences_licencia else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}{{ empty_table('Todos los conductores tienen órdenes activas.') }}{% endif %}
+  </div>
+</div>
+
+<div class="card reveal" style="margin-bottom:20px;">
+  <div class="card-header">
+    <div class="card-title">Historial de servicios por cliente</div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if historial_clientes %}
+    <table class="table">
+      <thead>
+        <tr><th>Cliente</th><th>Orden</th><th>Ruta</th><th>Fecha</th><th class="text-right">Facturado</th><th>Estado</th></tr>
+      </thead>
+      <tbody>
+        {% for h in historial_clientes %}
+        <tr>
+          <td class="text-sm font-medium">{{ h.razon_social }}</td>
+          <td class="tabular text-sm">{{ h.numero_orden }}</td>
+          <td class="text-sm">{{ h.ruta }}</td>
+          <td class="tabular text-sm">{{ h.fecha_programada.strftime('%d/%m/%Y') if h.fecha_programada else '—' }}</td>
+          <td class="tabular text-sm text-right">
+            {% if h.monto_facturado %}${{ "{:,.2f}".format(h.monto_facturado | float) }}{% else %}—{% endif %}
+          </td>
+          <td>{{ badge_estado(h.estado) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}{{ empty_table('Sin historial de servicios.') }}{% endif %}
+  </div>
+</div>
+
+<div class="card reveal" style="margin-bottom:20px;">
+  <div class="card-header">
+    <div class="card-title">Rentabilidad por ruta</div>
+    <span class="text-sm text-steel">{{ filtros.anio }} / {{ ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][filtros.mes - 1] }}</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if rentabilidad_ruta %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Ruta</th>
+          <th>Tramo</th>
+          <th class="text-right">Servicios</th>
+          <th class="text-right">Neto</th>
+          <th class="text-right">ITBMS</th>
+          <th class="text-right">Total</th>
+          <th class="text-right">Promedio</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set max_total = (rentabilidad_ruta|map(attribute='ingresos_totales')|map('float')|max) if rentabilidad_ruta else 1 %}
+        {% for r in rentabilidad_ruta %}
+        <tr>
+          <td class="text-sm font-medium">{{ r.ruta }}</td>
+          <td class="text-sm">
+            <div>{{ r.origen }} → {{ r.destino }}</div>
+            <div class="ascii-inline-bar">
+              <span class="ascii-inline-bar-fill progress-fill" data-width="{{ (((r.ingresos_totales or 0)|float / (max_total or 1)) * 100)|round }}"></span>
+            </div>
+          </td>
+          <td class="tabular text-sm text-right">{{ r.total_servicios }}</td>
+          <td class="tabular text-sm text-right">${{ "{:,.2f}".format((r.ingresos_netos or 0) | float) }}</td>
+          <td class="tabular text-sm text-right">${{ "{:,.2f}".format((r.itbms_cobrado or 0) | float) }}</td>
+          <td class="tabular text-sm text-right">${{ "{:,.2f}".format((r.ingresos_totales or 0) | float) }}</td>
+          <td class="tabular text-sm text-right">${{ "{:,.2f}".format((r.promedio_por_servicio or 0) | float) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="padding:20px;" class="text-sm text-steel">Sin datos de rentabilidad para el período seleccionado.</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:20px;">
+  <div class="card reveal">
+    <div class="card-header">
+      <div class="card-title">Mantenimientos en proceso</div>
+      {% if alertas_mantenimiento %}
+      <span class="badge--amber">{{ alertas_mantenimiento | length }} activos</span>
+      {% endif %}
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if alertas_mantenimiento %}
+      <table class="table">
+        <thead>
+          <tr><th>Vehículo</th><th>Tipo</th><th>Inicio</th><th>Taller</th></tr>
+        </thead>
+        <tbody>
+          {% for a in alertas_mantenimiento %}
+          <tr>
+            <td class="text-sm font-medium">{{ a.placa }} <span class="text-steel">{{ a.marca }} {{ a.modelo }}</span></td>
+            <td>{{ badge_estado(a.tipo) }}</td>
+            <td class="tabular text-sm">{{ a.fecha_inicio.strftime('%d/%m/%Y') if a.fecha_inicio else '—' }}</td>
+            <td class="text-sm">{{ a.taller or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}{{ empty_table('Sin mantenimientos activos.') }}{% endif %}
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header">
+      <div class="card-title">Conductores con más entregas</div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if conductores_top %}
+      <table class="table">
+        <thead>
+          <tr><th>Conductor</th><th class="text-right">Entregas</th><th class="text-right">Valor</th></tr>
+        </thead>
+        <tbody>
+          {% for c in conductores_top %}
+          <tr>
+            <td class="text-sm font-medium">{{ c.conductor }}</td>
+            <td class="tabular text-sm text-right">{{ c.entregas }}</td>
+            <td class="tabular text-sm text-right">
+              {% if c.valor_transportado %}${{ "{:,.2f}".format(c.valor_transportado | float) }}{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}{{ empty_table('Sin entregas completadas.') }}{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card reveal" style="margin-bottom:20px;">
+  <div class="card-header">
+    <div class="card-title">Consolidado de facturación mensual</div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if facturacion_mensual %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th class="text-right">Facturas</th>
+          <th class="text-right">Subtotal</th>
+          <th class="text-right">ITBMS</th>
+          <th class="text-right">Total</th>
+          <th class="text-right">Cobrado</th>
+          <th class="text-right">Por cobrar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set meses_nombre = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'] %}
+        {% for f in facturacion_mensual %}
+        <tr>
+          <td class="tabular text-sm font-medium">{{ meses_nombre[(f.mes | int) - 1] }} {{ f.anio }}</td>
+          <td class="tabular text-sm text-right">{{ f.total_facturas }}</td>
+          <td class="tabular text-sm text-right">${{ "{:,.2f}".format(f.ingresos_netos | float) }}</td>
+          <td class="tabular text-sm text-right">${{ "{:,.2f}".format(f.itbms | float) }}</td>
+          <td class="tabular text-sm font-semibold text-right">${{ "{:,.2f}".format(f.ingresos_totales | float) }}</td>
+          <td class="tabular text-sm text-right" style="color:var(--s-green);">${{ "{:,.2f}".format(f.cobrado | float) }}</td>
+          <td class="tabular text-sm text-right" style="color:var(--s-amber);">${{ "{:,.2f}".format(f.por_cobrar | float) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}{{ empty_table('Sin datos de facturación.') }}{% endif %}
+  </div>
+</div>
+
+<div class="card reveal">
+  <div class="card-header">
+    <div class="card-title">Bitácora del sistema</div>
+    <span class="text-sm text-steel">Últimas 50 operaciones</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if bitacora %}
+    <table class="table">
+      <thead>
+        <tr><th>Fecha</th><th>Tabla</th><th>Operación</th><th>ID</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        {% for b in bitacora %}
+        <tr>
+          <td class="tabular text-sm">{{ b.fecha_operacion.strftime('%d/%m/%y %H:%M') if b.fecha_operacion else '—' }}</td>
+          <td class="text-sm font-medium">{{ b.tabla_afectada }}</td>
+          <td class="text-sm">{{ b.operacion }}</td>
+          <td class="tabular text-sm">{{ b.id_registro }}</td>
+          <td class="text-sm text-steel">{{ b.descripcion or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}{{ empty_table('La bitácora está vacía.') }}{% endif %}
+  </div>
+</div>
+{% endblock %}

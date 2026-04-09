@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Centro de control{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Resumen operativo</span>
+{% endblock %}
+
+{% block content %}
+{% set total_operaciones = kpis.ordenes_activas + kpis.ordenes_pendientes + kpis.vehiculos_mantenimiento %}
+{% set max_ruta_servicios = (rutas_heatmap | map(attribute='servicios') | max) if rutas_heatmap else 1 %}
+
+<section class="dashboard-hero reveal">
+  <div class="dashboard-hero-grid">
+    <div class="dashboard-hero-copy">
+      <div class="dashboard-eyebrow">Panalogis / Nothing local build</div>
+      <h1 class="dashboard-hero-title">Operación visible, métricas claras, fricción mínima.</h1>
+      <p class="dashboard-hero-desc">
+        Estado actual de flota, personal, facturación y decisiones del turno en una sola vista.
+        Todo corre sobre Flask + MariaDB en tu entorno local.
+      </p>
+      <div class="dashboard-hero-tags">
+        <span>Base local</span>
+        <span>Datos demo</span>
+        <span>Triggers activos</span>
+        <span>Copiloto IA</span>
+      </div>
+    </div>
+
+    <div class="dashboard-hero-panel reveal">
+      <div class="dashboard-hero-panel-top">
+        <div>
+          <div class="dashboard-hero-number" data-countup="{{ kpis.ordenes_activas }}">0</div>
+          <div class="dashboard-hero-label">Órdenes activas</div>
+        </div>
+        <div class="dashboard-scan">
+          <span class="dashboard-scan-ring"></span>
+          <span class="dashboard-scan-core"></span>
+        </div>
+      </div>
+      <div class="dashboard-hero-meta">
+        <span>Pendientes: {{ kpis.ordenes_pendientes }}</span>
+        <span>Conductores activos: {{ kpis.conductores_activos }}</span>
+      </div>
+      <pre class="ascii-panel" aria-label="Estado técnico del sistema">
+[FLEET]      {{ "%02d"|format(kpis.vehiculos_total) }}
+[ACTIVE]     {{ "%02d"|format(kpis.vehiculos_activos) }}
+[TRANSIT]    {{ "%02d"|format(kpis.ordenes_activas) }}
+[PENDING]    {{ "%02d"|format(kpis.ordenes_pendientes) }}
+[SERVICE]    {{ "%02d"|format(kpis.vehiculos_mantenimiento) }}</pre>
+    </div>
+  </div>
+</section>
+
+<div class="grid grid-4 dashboard-kpis">
+  <div class="kpi-card reveal">
+    <div class="kpi-body">
+      <div class="kpi-label">Vehículos activos</div>
+      <div class="kpi-value tabular" data-countup="{{ kpis.vehiculos_activos }}">0</div>
+      <div class="kpi-sub">Total en flota: {{ kpis.vehiculos_total }}</div>
+      <div class="kpi-spark">
+        <span class="kpi-spark-bar progress-fill" data-width="{{ ((kpis.vehiculos_activos / (kpis.vehiculos_total or 1)) * 100)|round }}"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-card reveal">
+    <div class="kpi-body">
+      <div class="kpi-label">Órdenes en tránsito</div>
+      <div class="kpi-value tabular" data-countup="{{ kpis.ordenes_activas }}">0</div>
+      <div class="kpi-sub">Pendientes: {{ kpis.ordenes_pendientes }}</div>
+      <div class="kpi-spark">
+        <span class="kpi-spark-bar progress-fill" data-width="{{ ((kpis.ordenes_activas / (total_operaciones or 1)) * 100)|round }}"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-card reveal">
+    <div class="kpi-body">
+      <div class="kpi-label">Conductores activos</div>
+      <div class="kpi-value tabular" data-countup="{{ kpis.conductores_activos }}">0</div>
+      <div class="kpi-sub">Registrados: {{ kpis.conductores_total }}</div>
+      <div class="kpi-spark">
+        <span class="kpi-spark-bar progress-fill" data-width="{{ ((kpis.conductores_activos / (kpis.conductores_total or 1)) * 100)|round }}"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--alert reveal">
+    <div class="kpi-body">
+      <div class="kpi-label">En mantenimiento</div>
+      <div class="kpi-value tabular" data-countup="{{ kpis.vehiculos_mantenimiento }}">0</div>
+      <div class="kpi-sub">Fuera de servicio</div>
+      <div class="kpi-spark">
+        <span class="kpi-spark-bar kpi-spark-bar--danger progress-fill" data-width="{{ ((kpis.vehiculos_mantenimiento / (kpis.vehiculos_total or 1)) * 100)|round }}"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-intel-grid">
+  <section class="card ai-copilot-card reveal" data-ai-copilot>
+    <div class="card-header">
+      <div>
+        <div class="card-title">Copiloto operativo</div>
+        <div class="ai-copilot-subtitle">Lectura automática del turno, riesgos y próximos movimientos.</div>
+      </div>
+      <span class="ai-provider-pill" data-ai-provider>Pensando…</span>
+    </div>
+    <div class="card-body">
+      <div class="ai-copilot-prompts">
+        {% for prompt in ai_prompt_suggestions %}
+        <button type="button" class="ai-prompt-chip" data-ai-prompt="{{ prompt }}">{{ prompt }}</button>
+        {% endfor %}
+      </div>
+
+      <form class="ai-copilot-form" data-ai-form>
+        <label class="sr-only" for="ai-question">Pregunta operativa</label>
+        <input id="ai-question" class="form-input ai-copilot-input" name="question" placeholder="Pregúntale al copiloto por flota, facturación o prioridades del turno.">
+        <button type="submit" class="btn btn-secondary btn-sm">Analizar</button>
+      </form>
+
+      <div class="ai-copilot-output" data-ai-output>
+        <div class="ai-copilot-skeleton">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="dashboard-intel-stack">
+    <section class="card reveal">
+      <div class="card-header">
+        <div class="card-title">Pulso operativo</div>
+        <span class="text-sm text-steel">Estados en vivo</span>
+      </div>
+      <div class="card-body">
+        <div class="status-bars">
+          {% for item in ordenes_estado %}
+          <div class="status-bar-row">
+            <div class="status-bar-meta">
+              <span>{{ item.label }}</span>
+              <strong class="tabular">{{ item.total }}</strong>
+            </div>
+            <div class="status-bar-track">
+              <span class="status-bar-fill status-bar-fill--{{ item.tone }} progress-fill" data-width="{{ ((item.total / (max_ordenes_estado or 1)) * 100)|round }}"></span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal">
+      <div class="card-header">
+        <div class="card-title">Radar financiero</div>
+        <span class="text-sm text-steel">Montos por estado</span>
+      </div>
+      <div class="card-body">
+        <div class="finance-grid">
+          {% for item in facturacion_estado %}
+          <div class="finance-chip finance-chip--{{ item.tone }}">
+            <div class="finance-chip-label">{{ item.label }}</div>
+            <div class="finance-chip-value">${{ "{:,.2f}".format(item.monto) }}</div>
+            <div class="finance-chip-meta">{{ item.total_facturas }} factura(s)</div>
+            <div class="finance-chip-bar">
+              <span class="finance-chip-fill finance-chip-fill--{{ item.tone }} progress-fill" data-width="{{ ((item.monto / (max_facturacion_monto or 1)) * 100)|round }}"></span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="card reveal dashboard-route-card">
+  <div class="card-header">
+    <div class="card-title">Rutas calientes</div>
+    <span class="text-sm text-steel">Actividad e ingresos válidos</span>
+  </div>
+  <div class="card-body">
+    {% if rutas_heatmap %}
+    <div class="route-ladder">
+      {% for ruta in rutas_heatmap %}
+      <div class="route-ladder-row">
+        <div class="route-ladder-copy">
+          <div class="route-ladder-title">{{ ruta.ruta }}</div>
+          <div class="route-ladder-sub">{{ ruta.origen }} → {{ ruta.destino }}</div>
+        </div>
+        <div class="route-ladder-bar">
+          <span class="route-ladder-fill progress-fill" data-width="{{ ((ruta.servicios / (max_ruta_servicios or 1)) * 100)|round }}"></span>
+        </div>
+        <div class="route-ladder-metrics">
+          <span class="tabular">{{ ruta.servicios }} servicios</span>
+          <strong class="tabular">${{ "{:,.2f}".format((ruta.ingresos or 0)|float) }}</strong>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-title">Sin rutas destacadas</div>
+      <div class="empty-state-desc">Todavía no hay actividad suficiente para pintar el mapa de carga.</div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<div class="grid grid-2" style="margin-bottom: 28px;">
+  <div class="card reveal">
+    <div class="card-header">
+      <div class="card-title">Órdenes recientes</div>
+      <a href="{{ url_for('ordenes.listar_ordenes') }}" class="btn btn-ghost btn-sm">Ver todas</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      {% if ordenes_recientes %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Orden</th>
+            <th>Ruta</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in ordenes_recientes %}
+          <tr>
+            <td class="tabular text-sm font-medium">{{ o.numero_orden }}</td>
+            <td class="text-sm">
+              <span class="text-steel">{{ o.origen }}</span>
+              <span class="dashboard-arrow">→</span>
+              {{ o.destino }}
+            </td>
+            <td>
+              {% if o.estado == 'EN_TRANSITO' %}
+                <span class="badge--sky">En tránsito</span>
+              {% elif o.estado == 'PENDIENTE' %}
+                <span class="badge--amber">Pendiente</span>
+              {% elif o.estado == 'ENTREGADO' %}
+                <span class="badge--green">Entregado</span>
+              {% elif o.estado == 'CANCELADO' %}
+                <span class="badge--red">Cancelado</span>
+              {% endif %}
+            </td>
+            <td class="text-sm text-steel tabular">{{ o.fecha_creacion.strftime('%d/%m/%y') if o.fecha_creacion else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state" style="padding: 32px;">
+        <div class="empty-state-title">Sin órdenes todavía</div>
+        <div class="empty-state-desc">Las órdenes nuevas aparecerán aquí.</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header">
+      <div class="card-title">Estado de flota</div>
+      <a href="{{ url_for('vehiculos.listar_vehiculos') }}" class="btn btn-ghost btn-sm">Ver flota</a>
+    </div>
+    <div class="card-body">
+      {% if kpis.vehiculos_total %}
+      <div class="dashboard-meter">
+        {% set pct_activos = ((kpis.vehiculos_activos / kpis.vehiculos_total) * 100) | round %}
+        {% set pct_mant = ((kpis.vehiculos_mantenimiento / kpis.vehiculos_total) * 100) | round %}
+        {% set pct_inact = (100 - pct_activos - pct_mant) %}
+        <div class="dashboard-meter-track">
+          <div class="dashboard-meter-fill dashboard-meter-fill--white progress-fill" data-width="{{ pct_activos }}"></div>
+          <div class="dashboard-meter-fill dashboard-meter-fill--red progress-fill" data-width="{{ pct_mant }}"></div>
+          {% if pct_inact > 0 %}
+          <div class="dashboard-meter-fill dashboard-meter-fill--gray progress-fill" data-width="{{ pct_inact }}"></div>
+          {% endif %}
+        </div>
+        <div class="dashboard-meter-legend">
+          <span>Activos {{ kpis.vehiculos_activos }}</span>
+          <span>Mantenimiento {{ kpis.vehiculos_mantenimiento }}</span>
+          <span>Inactivos {{ kpis.vehiculos_inactivos | default(0) }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if vehiculos_mantenimiento %}
+      <div class="dashboard-tech-list">
+        <div class="dashboard-tech-label">Servicio técnico activo</div>
+        {% for v in vehiculos_mantenimiento %}
+        <div class="dashboard-tech-item">
+          <div>
+            <div class="text-sm font-medium">{{ v.placa }}</div>
+            <div class="text-xs text-steel">{{ v.marca }} {{ v.modelo }}</div>
+          </div>
+          <span class="badge--amber">Taller</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-sm text-steel" style="margin-top: 8px;">Toda la flota está operativa.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card reveal">
+  <div class="card-header">
+    <div class="card-title">Facturación pendiente</div>
+    <a href="{{ url_for('facturas.listar_facturas') }}" class="btn btn-ghost btn-sm">Ver facturas</a>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    {% if facturas_pendientes %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>N.º factura</th>
+          <th>Cliente</th>
+          <th>Orden</th>
+          <th class="text-right">Monto</th>
+          <th>Emisión</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in facturas_pendientes %}
+        <tr>
+          <td class="tabular text-sm font-medium">{{ f.numero_factura }}</td>
+          <td class="text-sm">{{ f.nombre_cliente | default('—') }}</td>
+          <td class="tabular text-sm text-steel">{{ f.id_orden }}</td>
+          <td class="tabular text-sm font-semibold text-right">${{ "%.2f"|format(f.total) }}</td>
+          <td class="tabular text-sm text-steel">{{ f.fecha_emision.strftime('%d/%m/%Y') if f.fecha_emision else '—' }}</td>
+          <td><span class="badge--amber">Pendiente</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding: 28px;">
+      <div class="empty-state-title">Sin facturas pendientes</div>
+      <div class="empty-state-desc">Todas las facturas están al día.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

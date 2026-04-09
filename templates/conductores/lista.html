@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, empty_table %}
+
+{% block title %}Conductores{% endblock %}
+{% block page_title %}Conductores{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Conductores</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('conductores.nuevo_conductor') }}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nuevo conductor
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Todos los conductores <span class="text-muted font-normal">({{ conductores | length }})</span></div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if conductores %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre completo</th>
+            <th>Licencia</th>
+            <th>Categoría</th>
+            <th>Vence</th>
+            <th class="col-center">Órdenes activas</th>
+            <th>Estado</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in conductores %}
+          <tr>
+            <td class="tabular text-sm font-medium">{{ c.cedula }}</td>
+            <td class="text-sm font-medium">{{ c.nombre }} {{ c.apellido }}</td>
+            <td class="tabular text-sm">{{ c.licencia }}</td>
+            <td class="text-sm">{{ c.categoria_licencia }}</td>
+            <td class="tabular text-sm {% if c.vences_licencia and c.vences_licencia.strftime('%Y%m%d') < '20260601' %}text-amber{% endif %}">
+              {{ c.vences_licencia.strftime('%d/%m/%Y') if c.vences_licencia else '—' }}
+            </td>
+            <td class="col-center tabular text-sm">
+              {% if c.ordenes_activas > 0 %}
+                <span class="badge--sky">{{ c.ordenes_activas }}</span>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>{{ badge_estado(c.estado) }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('conductores.detalle_conductor', conductor_id=c.id_conductor) }}" class="btn btn-ghost btn-sm">Ver</a>
+              <a href="{{ url_for('conductores.editar_conductor', conductor_id=c.id_conductor) }}" class="btn btn-ghost btn-sm">Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      {{ empty_table('No hay conductores registrados.') }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, btn_eliminar, campo %}
+
+{% block title %}Mantenimiento #{{ mantenimiento.id_mantenimiento }}{% endblock %}
+{% block page_title %}Mantenimiento — {{ mantenimiento.placa }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('mantenimiento.listar_mantenimientos') }}">Mantenimiento</a>
+  <span class="topbar-sep">/</span>
+  <span>#{{ mantenimiento.id_mantenimiento }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('mantenimiento.editar_mantenimiento', mantenimiento_id=mantenimiento.id_mantenimiento) }}" class="btn btn-secondary btn-sm">Editar</a>
+  {% if mantenimiento.estado != 'EN_PROCESO' %}
+    {{ btn_eliminar(url_for('mantenimiento.eliminar_mantenimiento', mantenimiento_id=mantenimiento.id_mantenimiento)) }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="align-items:start;">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Datos del mantenimiento</div>
+      {{ badge_estado(mantenimiento.estado) }}
+    </div>
+    <div class="card-body">
+      {{ campo('Tipo', mantenimiento.tipo | title) }}
+      {{ campo('Fecha inicio', mantenimiento.fecha_inicio.strftime('%d/%m/%Y') if mantenimiento.fecha_inicio else '—') }}
+      {{ campo('Fecha fin', mantenimiento.fecha_fin.strftime('%d/%m/%Y') if mantenimiento.fecha_fin else '—') }}
+      {{ campo('Taller', mantenimiento.taller) }}
+      {{ campo('Costo', ('$' ~ "{:,.2f}".format(mantenimiento.costo | float)) if mantenimiento.costo else '—') }}
+      {{ campo('Descripción', mantenimiento.descripcion) }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Vehículo asociado</div></div>
+    <div class="card-body">
+      {{ campo('Placa', mantenimiento.placa, mono=true) }}
+      {{ campo('Marca / Modelo', mantenimiento.marca ~ ' ' ~ mantenimiento.modelo) }}
+      {{ campo('Estado vehículo', mantenimiento.estado_vehiculo) }}
+      <div style="margin-top:16px;">
+        <a href="{{ url_for('vehiculos.detalle_vehiculo', vehiculo_id=mantenimiento.id_vehiculo) }}" class="btn btn-ghost btn-sm">Ver vehículo</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% if mantenimiento.estado == 'EN_PROCESO' %}
+<div style="margin-top:16px; padding:12px 16px; background:var(--s-amber-bg); border:1px solid var(--s-amber-ring); border-radius:var(--r-md);" class="text-sm">
+  El vehículo está actualmente fuera de servicio por este mantenimiento. Complétalo para restaurar su disponibilidad.
+</div>
+{% endif %}
+{% endblock %}

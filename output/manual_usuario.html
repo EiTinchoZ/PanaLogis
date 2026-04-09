@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PanaLogis — Manual de Usuario</title>
+<style>
+  @page { size: Letter; margin: 2cm 2.5cm; }
+  @media print {
+    .no-print { display: none !important; }
+    .page-break { page-break-after: always; }
+    .avoid-break { page-break-inside: avoid; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .no-print {
+    background: #1e293b;
+    color: #e2e8f0;
+    text-align: center;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 11pt;
+  }
+
+  /* Cover */
+  .cover {
+    text-align: center;
+    padding: 60px 20px;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  .cover-badge {
+    background: #0F172A;
+    color: #D97706;
+    padding: 6px 20px;
+    border-radius: 4px;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .cover h1 {
+    font-size: 30pt;
+    color: #0F172A;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+  .cover .tagline {
+    font-size: 13pt;
+    color: #475569;
+  }
+  .cover-version {
+    font-size: 10pt;
+    color: #94a3b8;
+  }
+
+  /* Typography */
+  h1 { font-size: 16pt; color: #0F172A; margin: 28px 0 12px; border-bottom: 2px solid #0F172A; padding-bottom: 6px; }
+  h2 { font-size: 13pt; color: #0F172A; margin: 22px 0 10px; }
+  h3 { font-size: 11pt; color: #1e293b; margin: 16px 0 8px; font-weight: 700; }
+  p { margin-bottom: 9px; }
+  ul, ol { margin: 8px 0 10px 22px; }
+  li { margin-bottom: 4px; }
+
+  .section { margin-bottom: 28px; }
+
+  /* Steps */
+  .steps { list-style: none; padding: 0; margin: 12px 0; }
+  .steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .step-num {
+    min-width: 28px;
+    height: 28px;
+    background: #0F172A;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10pt;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body strong { display: block; margin-bottom: 2px; }
+
+  /* Callout */
+  .callout {
+    border-left: 4px solid #D97706;
+    background: #FEF3C7;
+    padding: 10px 14px;
+    margin: 10px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 10.5pt;
+  }
+  .callout-info { border-left-color: #0369A1; background: #E0F2FE; }
+  .callout-red { border-left-color: #dc2626; background: #fee2e2; }
+  .callout-green { border-left-color: #16a34a; background: #dcfce7; }
+
+  /* Table */
+  table.t {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px;
+    font-size: 10pt;
+  }
+  table.t th { background: #0F172A; color: #fff; padding: 7px 10px; text-align: left; }
+  table.t td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+  table.t tr:nth-child(even) td { background: #f8fafc; }
+
+  code { font-family: "Courier New", monospace; background: #f1f5f9; padding: 1px 5px; border-radius: 2px; font-size: 10pt; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9pt; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-amber { background: #FEF3C7; color: #92400E; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #E0F2FE; color: #075985; }
+  .badge-gray { background: #f1f5f9; color: #475569; }
+
+  .module-header {
+    background: #0F172A;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 4px 4px 0 0;
+    font-size: 12pt;
+    font-weight: 700;
+    margin-top: 20px;
+  }
+  .module-body {
+    border: 1px solid #0F172A;
+    border-top: none;
+    padding: 14px 16px;
+    border-radius: 0 0 4px 4px;
+    margin-bottom: 20px;
+  }
+  .module-body h3 { margin-top: 10px; }
+  .module-body h3:first-child { margin-top: 0; }
+
+  .field-row {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 10.5pt;
+  }
+  .field-name { font-weight: 700; min-width: 160px; color: #0F172A; }
+  .field-required { color: #dc2626; font-size: 9pt; font-weight: 700; min-width: 60px; }
+  .field-desc { color: #475569; flex: 1; }
+
+  .shortcut-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    font-size: 10pt;
+  }
+  .shortcut-item kbd {
+    background: #0F172A;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 9pt;
+  }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  Para PDF: Ctrl+P → Guardar como PDF → Escala 95% → Habilitar gráficos de fondo
+</div>
+
+<!-- PORTADA -->
+<div class="cover page-break">
+  <div class="cover-badge">Manual de Usuario — v1.0</div>
+  <div>
+    <h1>PanaLogis</h1>
+    <p class="tagline">Sistema de Gestión de Operaciones<br>para Empresas de Transporte de Carga</p>
+  </div>
+  <div style="color:#475569; font-size:11pt; text-align:center;">
+    <p>Instituto Técnico Superior de Educación (ITSE)</p>
+    <p>Bases de Datos I — T.S. en Inteligencia Artificial</p>
+  </div>
+  <div class="cover-version">Abril 2026 · Bundy · Herrera · De León</div>
+</div>
+
+<!-- INTRODUCCIÓN -->
+<div class="section page-break">
+  <h1>Introducción</h1>
+  <p>
+    PanaLogis es un sistema web para la gestión operativa de empresas de transporte de carga terrestre. Permite registrar y controlar la flota de vehículos, los conductores, los clientes, las órdenes de servicio, el mantenimiento y la facturación desde una única interfaz. Las reglas críticas del negocio (como bloquear conductores ocupados o generar facturas automáticamente) se aplican en la base de datos, por lo que el sistema garantiza consistencia sin importar quién opere la interfaz.
+  </p>
+  <p>Este manual cubre todos los módulos del sistema con instrucciones paso a paso para las operaciones más frecuentes.</p>
+
+  <h2>Requisitos para ejecutar el sistema</h2>
+  <table class="t avoid-break">
+    <thead><tr><th>Componente</th><th>Versión</th><th>Notas</th></tr></thead>
+    <tbody>
+      <tr><td>XAMPP (MariaDB)</td><td>10.x</td><td>MySQL en puerto 3306 debe estar activo</td></tr>
+      <tr><td>Python</td><td>3.10+</td><td>Instalado en el sistema</td></tr>
+      <tr><td>Flask</td><td>3.x</td><td><code>pip install flask mysql-connector-python</code></td></tr>
+      <tr><td>Navegador</td><td>Chrome / Edge / Firefox</td><td>Cualquier versión moderna</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Cómo iniciar el sistema</h2>
+  <ol class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Iniciar XAMPP y activar MySQL</strong>
+        Abrir XAMPP Control Panel y presionar <em>Start</em> en MySQL. El indicador debe quedar en verde.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Importar la base de datos (primera vez)</strong>
+        En una terminal, ejecutar:<br>
+        <code>mysql -u root -p --default-character-set=utf8mb4 &lt; database/panalogis.sql</code>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Iniciar Flask</strong>
+        Desde la carpeta del proyecto: <code>python app.py</code>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Abrir el sistema</strong>
+        En el navegador, ir a <code>http://localhost:5000</code>. El sistema redirige al Dashboard automáticamente.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- NAVEGACIÓN GENERAL -->
+<div class="section page-break">
+  <h1>Navegación general</h1>
+  <p>La interfaz tiene dos zonas fijas:</p>
+  <ul>
+    <li><strong>Sidebar izquierdo:</strong> Acceso rápido a todos los módulos del sistema. El ítem activo queda destacado.</li>
+    <li><strong>Barra superior:</strong> Muestra el título de la pantalla actual, la ruta de navegación (breadcrumb) y el indicador de conexión a la base de datos.</li>
+  </ul>
+
+  <table class="t avoid-break">
+    <thead><tr><th>Sección del sidebar</th><th>Módulos disponibles</th></tr></thead>
+    <tbody>
+      <tr><td>Sistema</td><td>Dashboard — vista principal con KPIs y copiloto IA</td></tr>
+      <tr><td>Flota</td><td>Vehículos, Conductores, Mantenimiento</td></tr>
+      <tr><td>Operación</td><td>Clientes, Órdenes de Servicio, Facturación, Reportes</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info">
+    Los mensajes de confirmación (fondo verde) y error (fondo rojo) aparecen debajo de la barra superior y desaparecen automáticamente después de 6 segundos.
+  </div>
+
+  <h2>Estados del sistema — referencia rápida</h2>
+  <table class="t avoid-break">
+    <thead><tr><th>Entidad</th><th>Estados posibles</th></tr></thead>
+    <tbody>
+      <tr><td>Vehículos</td><td><span class="badge badge-green">ACTIVO</span> &nbsp;<span class="badge badge-amber">MANTENIMIENTO</span> &nbsp;<span class="badge badge-gray">INACTIVO</span></td></tr>
+      <tr><td>Conductores</td><td><span class="badge badge-green">ACTIVO</span> &nbsp;<span class="badge badge-gray">INACTIVO</span> &nbsp;<span class="badge badge-red">SUSPENDIDO</span></td></tr>
+      <tr><td>Clientes</td><td><span class="badge badge-green">ACTIVO</span> &nbsp;<span class="badge badge-gray">INACTIVO</span></td></tr>
+      <tr><td>Órdenes</td><td><span class="badge badge-amber">PENDIENTE</span> &nbsp;<span class="badge badge-blue">EN_TRANSITO</span> &nbsp;<span class="badge badge-green">ENTREGADO</span> &nbsp;<span class="badge badge-red">CANCELADO</span></td></tr>
+      <tr><td>Mantenimiento</td><td><span class="badge badge-amber">EN_PROCESO</span> &nbsp;<span class="badge badge-green">COMPLETADO</span></td></tr>
+      <tr><td>Facturas</td><td><span class="badge badge-amber">PENDIENTE</span> &nbsp;<span class="badge badge-green">PAGADA</span> &nbsp;<span class="badge badge-red">ANULADA</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DASHBOARD -->
+<div class="section page-break">
+  <h1>Dashboard</h1>
+  <p>El Dashboard es la pantalla principal. Muestra el estado operativo en tiempo real consultando directamente la base de datos.</p>
+
+  <h2>Secciones del dashboard</h2>
+
+  <div class="module-body" style="border:1px solid #e2e8f0; border-radius:4px;">
+    <h3>Panel de KPIs (tarjetas superiores)</h3>
+    <p>Cuatro métricas clave: vehículos monitoreados, órdenes activas, conductores disponibles y facturas válidas del mes. Cada cifra viene de una consulta directa a la BD.</p>
+
+    <h3>Gráfico de órdenes por estado</h3>
+    <p>Barras horizontales que muestran la distribución de órdenes entre PENDIENTE, EN_TRANSITO, ENTREGADO y CANCELADO. Se actualiza con cada recarga del dashboard.</p>
+
+    <h3>Radar financiero</h3>
+    <p>Muestra montos agrupados por estado de factura: cuánto está cobrado (PAGADA), cuánto falta cobrar (PENDIENTE) y qué fue anulado. Las facturas ANULADA no se suman al total financiero.</p>
+
+    <h3>Ladder de rutas calientes</h3>
+    <p>Las 5 rutas con mayor número de servicios registrados, ordenadas de mayor a menor carga operativa.</p>
+
+    <h3>Órdenes recientes</h3>
+    <p>Tabla con las últimas 8 órdenes creadas. Clic en el número de orden lleva al detalle completo.</p>
+
+    <h3>Bitácora del sistema</h3>
+    <p>Últimas 4 entradas de auditoría automática (cambios de estado en órdenes registrados por el trigger).</p>
+
+    <h3>Copiloto IA</h3>
+    <p>Panel interactivo que analiza el estado operativo actual y genera recomendaciones. Usa los datos reales de la BD para producir lecturas de turno, alertas y acciones prioritarias. Puede responder preguntas específicas sobre flota, cobranza u operación.</p>
+  </div>
+</div>
+
+<!-- MÓDULO VEHÍCULOS -->
+<div class="section page-break">
+  <div class="module-header">Módulo: Vehículos (Flota)</div>
+  <div class="module-body">
+    <p>Gestiona el inventario de unidades de transporte. El estado operativo de cada vehículo es controlado automáticamente por los triggers de mantenimiento.</p>
+
+    <h3>Ver lista de vehículos</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Clic en <strong>Vehículos</strong> en el sidebar.</div></li>
+      <li><div class="step-num">2</div><div class="step-body">La tabla muestra placa, tipo, marca/modelo, año, estado y kilometraje. Se puede ordenar por cualquier columna.</div></li>
+      <li><div class="step-num">3</div><div class="step-body">Clic en la placa o en el botón de detalle para ver el historial de mantenimiento del vehículo.</div></li>
+    </ol>
+
+    <h3>Registrar nuevo vehículo</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Clic en <strong>Nuevo vehículo</strong> (botón superior derecho).</div></li>
+      <li><div class="step-num">2</div><div class="step-body">Completar los campos requeridos:</div></li>
+    </ol>
+    <div style="margin: 8px 0 12px 42px;">
+      <div class="field-row"><span class="field-name">Placa</span><span class="field-required">REQUERIDO</span><span class="field-desc">Debe ser único en el sistema. Formato: AB-1234</span></div>
+      <div class="field-row"><span class="field-name">Marca / Modelo</span><span class="field-required">REQUERIDO</span><span class="field-desc">Fabricante y referencia del vehículo</span></div>
+      <div class="field-row"><span class="field-name">Año</span><span class="field-required">REQUERIDO</span><span class="field-desc">Año de fabricación (4 dígitos)</span></div>
+      <div class="field-row"><span class="field-name">Tipo de vehículo</span><span class="field-required">REQUERIDO</span><span class="field-desc">Seleccionar de la lista (define capacidad en toneladas)</span></div>
+      <div class="field-row"><span class="field-name">Kilometraje</span><span class="field-required">opcional</span><span class="field-desc">Kilometraje actual del odómetro</span></div>
+    </div>
+    <ol class="steps" start="3">
+      <li><div class="step-num">3</div><div class="step-body">Clic en <strong>Guardar</strong>. El sistema registra el vehículo en estado ACTIVO.</div></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Importante:</strong> El estado del vehículo (ACTIVO / MANTENIMIENTO) lo controla automáticamente el módulo de mantenimiento. No se puede modificar manualmente desde este módulo para evitar inconsistencias.
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO CONDUCTORES -->
+<div class="section">
+  <div class="module-header">Módulo: Conductores</div>
+  <div class="module-body">
+    <p>Gestiona el personal de conducción. Incluye control de vencimiento de licencias.</p>
+
+    <h3>Registrar conductor</h3>
+    <div class="field-row"><span class="field-name">Cédula</span><span class="field-required">REQUERIDO</span><span class="field-desc">Cédula panameña única</span></div>
+    <div class="field-row"><span class="field-name">Nombre / Apellido</span><span class="field-required">REQUERIDO</span><span class="field-desc">Nombre completo del conductor</span></div>
+    <div class="field-row"><span class="field-name">Licencia</span><span class="field-required">REQUERIDO</span><span class="field-desc">Número de licencia (debe ser único)</span></div>
+    <div class="field-row"><span class="field-name">Categoría de licencia</span><span class="field-required">REQUERIDO</span><span class="field-desc">C2, C3, etc. según tipo de vehículo que opera</span></div>
+    <div class="field-row"><span class="field-name">Vencimiento de licencia</span><span class="field-required">REQUERIDO</span><span class="field-desc">El dashboard y reportes alertan licencias próximas a vencer</span></div>
+    <div class="field-row"><span class="field-name">Teléfono / Email</span><span class="field-required">opcional</span><span class="field-desc">Datos de contacto para emergencias</span></div>
+    <div style="margin-bottom:10px;"></div>
+
+    <div class="callout callout-info">
+      La columna "Órdenes activas" en la lista indica si el conductor tiene una orden en estado PENDIENTE o EN_TRANSITO. Si tiene activas, el sistema bloquea su asignación a una nueva orden (regla de negocio aplicada por trigger en la BD).
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO CLIENTES -->
+<div class="section">
+  <div class="module-header">Módulo: Clientes</div>
+  <div class="module-body">
+    <p>Gestiona las empresas que contratan servicios de transporte.</p>
+
+    <div class="field-row"><span class="field-name">RUC</span><span class="field-required">REQUERIDO</span><span class="field-desc">Registro Único del Contribuyente panameño (único en el sistema)</span></div>
+    <div class="field-row"><span class="field-name">Razón social</span><span class="field-required">REQUERIDO</span><span class="field-desc">Nombre legal de la empresa</span></div>
+    <div class="field-row"><span class="field-name">Contacto</span><span class="field-required">opcional</span><span class="field-desc">Nombre, teléfono y email de la persona de contacto</span></div>
+    <div class="field-row"><span class="field-name">Dirección</span><span class="field-required">opcional</span><span class="field-desc">Ubicación física de la empresa</span></div>
+    <div style="margin-bottom:10px;"></div>
+
+    <p>El detalle del cliente muestra el historial completo de órdenes de servicio con sus estados y montos facturados.</p>
+  </div>
+</div>
+
+<!-- MÓDULO ÓRDENES -->
+<div class="section page-break">
+  <div class="module-header">Módulo: Órdenes de Servicio</div>
+  <div class="module-body">
+    <p>Es el módulo central del sistema. Todas las operaciones de transporte se gestionan aquí. La creación de órdenes usa el procedimiento almacenado <code>sp_crear_orden</code> que maneja la transacción completa con validaciones de integridad.</p>
+
+    <h3>Crear nueva orden</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Clic en <strong>Nueva orden</strong>.</div></li>
+      <li><div class="step-num">2</div><div class="step-body">Completar todos los campos requeridos:</div></li>
+    </ol>
+    <div style="margin: 8px 0 12px 42px;">
+      <div class="field-row"><span class="field-name">Fecha programada</span><span class="field-required">REQUERIDO</span><span class="field-desc">Fecha de entrega comprometida al cliente</span></div>
+      <div class="field-row"><span class="field-name">Cliente</span><span class="field-required">REQUERIDO</span><span class="field-desc">Solo muestra clientes en estado ACTIVO</span></div>
+      <div class="field-row"><span class="field-name">Ruta</span><span class="field-required">REQUERIDO</span><span class="field-desc">Determina la tarifa base para la factura</span></div>
+      <div class="field-row"><span class="field-name">Vehículo</span><span class="field-required">REQUERIDO</span><span class="field-desc">Solo vehículos disponibles (no en mantenimiento)</span></div>
+      <div class="field-row"><span class="field-name">Conductor</span><span class="field-required">REQUERIDO</span><span class="field-desc">Solo conductores sin orden activa asignada</span></div>
+      <div class="field-row"><span class="field-name">Tipo de carga</span><span class="field-required">REQUERIDO</span><span class="field-desc">Clasificación de la mercancía</span></div>
+      <div class="field-row"><span class="field-name">Peso (kg)</span><span class="field-required">REQUERIDO</span><span class="field-desc">Peso de la carga — determina el monto de la factura</span></div>
+      <div class="field-row"><span class="field-name">Descripción</span><span class="field-required">opcional</span><span class="field-desc">Descripción de la mercancía a transportar</span></div>
+    </div>
+    <ol class="steps" start="3">
+      <li><div class="step-num">3</div><div class="step-body">Clic en <strong>Crear orden</strong>. El sistema ejecuta <code>sp_crear_orden</code> y asigna automáticamente el número con formato ORD-AAAA-NNNNNN.</div></li>
+    </ol>
+
+    <div class="callout callout-red avoid-break">
+      <strong>Reglas automáticas — la BD las aplica sin intervención del operador:</strong>
+      <ul style="margin: 6px 0 0 16px;">
+        <li>Si el conductor ya tiene una orden PENDIENTE o EN_TRANSITO → la orden se rechaza con mensaje descriptivo.</li>
+        <li>Si el vehículo está en estado MANTENIMIENTO → la orden se rechaza.</li>
+      </ul>
+    </div>
+
+    <h3>Cambiar el estado de una orden</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Clic en el número de orden para ir al detalle.</div></li>
+      <li><div class="step-num">2</div><div class="step-body">Clic en <strong>Editar</strong>.</div></li>
+      <li><div class="step-num">3</div><div class="step-body">Seleccionar el nuevo estado en el campo correspondiente.</div></li>
+      <li><div class="step-num">4</div><div class="step-body">Guardar. Si el nuevo estado es <strong>ENTREGADO</strong>, la factura se genera automáticamente.</div></li>
+    </ol>
+
+    <div class="callout callout-green">
+      Al marcar una orden como ENTREGADO, el trigger <code>trg_generar_factura</code> crea automáticamente la factura con el cálculo correcto (tarifa de ruta × toneladas + 7% ITBMS). La factura aparecerá inmediatamente en el módulo de Facturación.
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO MANTENIMIENTO -->
+<div class="section page-break">
+  <div class="module-header">Módulo: Mantenimiento</div>
+  <div class="module-body">
+    <p>Registra intervenciones preventivas, correctivas y revisiones de los vehículos. Al crear un mantenimiento, el estado del vehículo cambia automáticamente.</p>
+
+    <h3>Registrar mantenimiento</h3>
+    <div class="field-row"><span class="field-name">Vehículo</span><span class="field-required">REQUERIDO</span><span class="field-desc">El vehículo pasa a estado MANTENIMIENTO al guardar</span></div>
+    <div class="field-row"><span class="field-name">Tipo</span><span class="field-required">REQUERIDO</span><span class="field-desc">PREVENTIVO / CORRECTIVO / REVISION</span></div>
+    <div class="field-row"><span class="field-name">Fecha inicio</span><span class="field-required">REQUERIDO</span><span class="field-desc">Fecha de ingreso al taller</span></div>
+    <div class="field-row"><span class="field-name">Descripción</span><span class="field-required">REQUERIDO</span><span class="field-desc">Detalle de la intervención a realizar</span></div>
+    <div class="field-row"><span class="field-name">Costo</span><span class="field-required">opcional</span><span class="field-desc">Costo estimado o final en USD</span></div>
+    <div class="field-row"><span class="field-name">Taller</span><span class="field-required">opcional</span><span class="field-desc">Nombre del taller que realiza el trabajo</span></div>
+    <div style="margin-bottom: 10px;"></div>
+
+    <div class="callout">
+      <strong>Ciclo automático del vehículo:</strong>
+      <ul style="margin: 6px 0 0 16px;">
+        <li><strong>Al crear el mantenimiento (EN_PROCESO):</strong> El vehículo pasa automáticamente a estado MANTENIMIENTO y queda bloqueado para nuevas órdenes.</li>
+        <li><strong>Al marcar como COMPLETADO:</strong> El vehículo vuelve automáticamente a estado ACTIVO y queda disponible para asignación.</li>
+      </ul>
+    </div>
+
+    <h3>Cerrar un mantenimiento</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Ir al detalle del mantenimiento.</div></li>
+      <li><div class="step-num">2</div><div class="step-body">Clic en <strong>Editar</strong>.</div></li>
+      <li><div class="step-num">3</div><div class="step-body">Cambiar estado a <strong>COMPLETADO</strong>, registrar fecha de fin y costo final.</div></li>
+      <li><div class="step-num">4</div><div class="step-body">Guardar. El vehículo quedará disponible inmediatamente.</div></li>
+    </ol>
+  </div>
+</div>
+
+<!-- MÓDULO FACTURACIÓN -->
+<div class="section">
+  <div class="module-header">Módulo: Facturación</div>
+  <div class="module-body">
+    <p>Las facturas son generadas automáticamente por la base de datos cuando una orden pasa a estado ENTREGADO. Este módulo sirve para consultar y gestionar el estado de cobro.</p>
+
+    <h3>Ver facturas</h3>
+    <p>La lista muestra todas las facturas con su número, monto, estado y cliente. Se puede filtrar por estado usando las opciones superiores.</p>
+
+    <h3>Registrar pago de una factura</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Clic en el número de factura para ver el detalle.</div></li>
+      <li><div class="step-num">2</div><div class="step-body">Clic en <strong>Editar</strong>.</div></li>
+      <li><div class="step-num">3</div><div class="step-body">Cambiar estado a <strong>PAGADA</strong> y registrar la fecha de pago.</div></li>
+      <li><div class="step-num">4</div><div class="step-body">Guardar. La factura queda registrada como cobrada.</div></li>
+    </ol>
+
+    <h3>Anular una factura</h3>
+    <p>Seleccionar <strong>ANULADA</strong> en el selector de estado. Las facturas anuladas son excluidas de todos los cálculos financieros y reportes de rentabilidad.</p>
+
+    <div class="callout callout-info">
+      <strong>Fórmula de facturación:</strong> Subtotal = tarifa_base_ruta × (peso_kg / 1000) · Impuesto ITBMS = Subtotal × 0.07 · Total = Subtotal × 1.07
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO REPORTES -->
+<div class="section page-break">
+  <div class="module-header">Módulo: Reportes</div>
+  <div class="module-body">
+    <p>Panel unificado con 8 reportes operativos. Todos los datos se calculan en tiempo real desde la base de datos al abrir el módulo.</p>
+
+    <h3>Filtro por período</h3>
+    <p>En la parte superior del módulo hay un selector de Mes y Año. El filtro aplica a los reportes financieros y de rentabilidad. Dejar en blanco para ver datos históricos completos.</p>
+
+    <h3>Reportes disponibles</h3>
+    <table class="t avoid-break">
+      <thead><tr><th>Reporte</th><th>Qué muestra</th></tr></thead>
+      <tbody>
+        <tr><td>Estado de la flota</td><td>Todos los vehículos con tipo, estado y kilometraje</td></tr>
+        <tr><td>Alerta de licencias</td><td>Conductores activos ordenados por vencimiento de licencia — los más próximos a vencer aparecen primero</td></tr>
+        <tr><td>Historial por cliente</td><td>Órdenes agrupadas por cliente con estado y monto facturado</td></tr>
+        <tr><td>Rentabilidad por ruta</td><td>Ingresos netos, ITBMS cobrado e ingreso total por ruta (excluye facturas ANULADA). Usa el SP <code>sp_rentabilidad_ruta</code></td></tr>
+        <tr><td>Mantenimiento activo</td><td>Vehículos actualmente en taller con tipo de intervención y costo</td></tr>
+        <tr><td>Conductores destacados</td><td>Conductores con más entregas completadas y valor transportado</td></tr>
+        <tr><td>Consolidado financiero</td><td>Ingresos totales, cobrado, por cobrar e ITBMS del período seleccionado</td></tr>
+        <tr><td>Bitácora de operaciones</td><td>Últimas 50 entradas de auditoría automática (cambios de estado en órdenes)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- COPILOTO IA -->
+<div class="section">
+  <div class="module-header">Copiloto IA — Panel de inteligencia operativa</div>
+  <div class="module-body">
+    <p>El copiloto IA está integrado en el Dashboard. Lee los datos reales del sistema y genera análisis operativos, alertas y recomendaciones de acción.</p>
+
+    <h3>Cómo usar el copiloto</h3>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div class="step-body">En el Dashboard, localizar el panel <strong>"Copiloto IA"</strong>.</div></li>
+      <li><div class="step-num">2</div><div class="step-body">Usar uno de los <strong>prompts rápidos</strong> (botones de pregunta frecuente) o escribir una pregunta propia en el campo de texto.</div></li>
+      <li><div class="step-num">3</div><div class="step-body">El sistema responde con un resumen del turno, hallazgos clave y acciones prioritarias.</div></li>
+    </ol>
+
+    <p><strong>Preguntas de ejemplo:</strong></p>
+    <ul>
+      <li>"Dame el resumen del turno."</li>
+      <li>"¿Qué riesgo operativo atiendo primero?"</li>
+      <li>"Explícame la cobranza en simple."</li>
+      <li>"Lee la flota y el taller."</li>
+    </ul>
+
+    <div class="callout callout-info">
+      El copiloto funciona en dos modos: <strong>Motor local</strong> (análisis basado en reglas con datos reales, siempre disponible) y <strong>Groq IA</strong> (análisis con lenguaje natural via Groq API, requiere clave GROQ_API_KEY configurada en el entorno). Si Groq no está disponible, el sistema degrada automáticamente al motor local sin afectar la operación.
+    </div>
+  </div>
+</div>
+
+<!-- ERRORES FRECUENTES -->
+<div class="section page-break">
+  <h1>Mensajes de error frecuentes</h1>
+
+  <table class="t">
+    <thead><tr><th>Mensaje</th><th>Causa</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>"El conductor ya tiene una orden activa asignada."</td>
+        <td>Se intentó asignar un conductor que ya tiene una orden PENDIENTE o EN_TRANSITO.</td>
+        <td>Seleccionar otro conductor disponible, o cambiar el estado de la orden activa del conductor antes de crear una nueva.</td>
+      </tr>
+      <tr>
+        <td>"El vehículo está en mantenimiento y no puede operar."</td>
+        <td>El vehículo seleccionado tiene un mantenimiento EN_PROCESO.</td>
+        <td>Seleccionar otro vehículo ACTIVO, o completar el mantenimiento del vehículo primero.</td>
+      </tr>
+      <tr>
+        <td>"No se pudo conectar a MariaDB."</td>
+        <td>El servicio MySQL de XAMPP no está activo.</td>
+        <td>Abrir XAMPP Control Panel y presionar Start en MySQL.</td>
+      </tr>
+      <tr>
+        <td>Página en blanco o error 500</td>
+        <td>Flask no está ejecutándose.</td>
+        <td>Abrir terminal en la carpeta del proyecto y ejecutar <code>python app.py</code>.</td>
+      </tr>
+      <tr>
+        <td>"Registro no encontrado."</td>
+        <td>Se intentó editar o eliminar un registro que ya no existe.</td>
+        <td>Regresar a la lista y seleccionar el registro correcto.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h1 style="margin-top: 30px;">Referencia rápida — Operaciones por módulo</h1>
+  <table class="t">
+    <thead><tr><th>Módulo</th><th>Crear</th><th>Editar</th><th>Eliminar</th><th>Ver detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Vehículos</td><td>Sí</td><td>Sí (sin estado manual)</td><td>Sí</td><td>Sí + historial mantenimiento</td></tr>
+      <tr><td>Conductores</td><td>Sí</td><td>Sí</td><td>Sí</td><td>Sí + órdenes activas</td></tr>
+      <tr><td>Clientes</td><td>Sí</td><td>Sí</td><td>Sí</td><td>Sí + historial de órdenes</td></tr>
+      <tr><td>Órdenes</td><td>Sí (via SP)</td><td>Sí (cambio de estado)</td><td>Sí</td><td>Sí + bitácora de la orden</td></tr>
+      <tr><td>Mantenimiento</td><td>Sí</td><td>Sí (completar mantenimiento)</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Facturación</td><td>Automático</td><td>Solo estado y fecha pago</td><td>No (anular)</td><td>Sí + detalle de orden</td></tr>
+      <tr><td>Reportes</td><td>—</td><td>—</td><td>—</td><td>8 reportes con filtro de período</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info" style="margin-top: 20px;">
+    <strong>Contacto de soporte técnico:</strong> En caso de errores no descritos en este manual, verificar el archivo <code>server.err.log</code> en la carpeta del proyecto para obtener información detallada del error.
+  </div>
+</div>
+
+<div class="no-print" style="margin-top: 30px; text-align: center; color: #94a3b8;">
+  PanaLogis — Manual de Usuario v1.0 — ITSE BD1 2026 — Bundy · Herrera · De León
+</div>
+
+</body>
+</html>

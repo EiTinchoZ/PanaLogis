@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, btn_eliminar, campo %}
+
+{% block title %}{{ conductor.nombre }} {{ conductor.apellido }}{% endblock %}
+{% block page_title %}{{ conductor.nombre }} {{ conductor.apellido }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('conductores.listar_conductores') }}">Conductores</a>
+  <span class="topbar-sep">/</span>
+  <span>{{ conductor.cedula }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('conductores.editar_conductor', conductor_id=conductor.id_conductor) }}" class="btn btn-secondary btn-sm">Editar</a>
+  {{ btn_eliminar(url_for('conductores.eliminar_conductor', conductor_id=conductor.id_conductor)) }}
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="margin-bottom:24px; align-items:start;">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Datos del conductor</div>
+      {{ badge_estado(conductor.estado) }}
+    </div>
+    <div class="card-body">
+      {{ campo('Cédula', conductor.cedula, mono=true) }}
+      {{ campo('Nombre', conductor.nombre ~ ' ' ~ conductor.apellido) }}
+      {{ campo('Teléfono', conductor.telefono) }}
+      {{ campo('Email', conductor.email) }}
+      {{ campo('N° Licencia', conductor.licencia, mono=true) }}
+      {{ campo('Categoría', conductor.categoria_licencia) }}
+      {{ campo('Vence licencia', conductor.vences_licencia.strftime('%d/%m/%Y') if conductor.vences_licencia else '—') }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Órdenes recientes</div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if ordenes %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>N° Orden</th>
+            <th>Ruta</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in ordenes %}
+          <tr>
+            <td class="tabular text-sm font-medium">
+              <a href="{{ url_for('ordenes.detalle_orden', orden_id=o.id_orden) }}" class="text-amber">{{ o.numero_orden }}</a>
+            </td>
+            <td class="text-sm">{{ o.ruta }}</td>
+            <td class="tabular text-sm">{{ o.fecha_programada.strftime('%d/%m/%Y') if o.fecha_programada else '—' }}</td>
+            <td>{{ badge_estado(o.estado) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:24px 20px; text-align:center;" class="text-sm text-steel">Sin órdenes asignadas.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

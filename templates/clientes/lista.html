@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, empty_table %}
+
+{% block title %}Clientes{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Clientes</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('clientes.nuevo_cliente') }}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nuevo cliente
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Todos los clientes <span class="text-muted font-normal">({{ clientes | length }})</span></div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if clientes %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>RUC</th>
+            <th>Razón social</th>
+            <th>Contacto</th>
+            <th>Teléfono</th>
+            <th class="col-center">Órdenes</th>
+            <th>Estado</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clientes %}
+          <tr>
+            <td class="tabular text-sm font-medium">{{ c.ruc }}</td>
+            <td class="text-sm font-medium">{{ c.razon_social }}</td>
+            <td class="text-sm">{{ c.contacto_nombre or '—' }}</td>
+            <td class="tabular text-sm">{{ c.contacto_tel or '—' }}</td>
+            <td class="col-center tabular text-sm">{{ c.total_ordenes }}</td>
+            <td>{{ badge_estado(c.estado) }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('clientes.detalle_cliente', cliente_id=c.id_cliente) }}" class="btn btn-ghost btn-sm">Ver</a>
+              <a href="{{ url_for('clientes.editar_cliente', cliente_id=c.id_cliente) }}" class="btn btn-ghost btn-sm">Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      {{ empty_table('No hay clientes registrados.') }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

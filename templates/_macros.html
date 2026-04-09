@@ -1,0 +1,52 @@
+{# ── MACROS GLOBALES — PanaLogis ──────────────────────────────── #}
+
+{# Badge de estado universal #}
+{% macro badge_estado(estado) %}
+  {% set mapa = {
+    'ACTIVO':       'green',
+    'INACTIVO':     'gray',
+    'SUSPENDIDO':   'red',
+    'MANTENIMIENTO':'red',
+    'PENDIENTE':    'amber',
+    'EN_TRANSITO':  'sky',
+    'ENTREGADO':    'green',
+    'CANCELADO':    'red',
+    'PAGADA':       'green',
+    'ANULADA':      'red',
+    'EN_PROCESO':   'amber',
+    'COMPLETADO':   'green',
+    'PREVENTIVO':   'sky',
+    'CORRECTIVO':   'red',
+    'REVISION':     'gray'
+  } %}
+  <span class="badge--{{ mapa.get(estado, 'gray') }}">{{ estado | replace('_', ' ') | title }}</span>
+{% endmacro %}
+
+{# Botón eliminar con confirmación #}
+{% macro btn_eliminar(action_url, texto='Eliminar') %}
+  <form method="POST" action="{{ action_url }}" style="display:inline;"
+        onsubmit="return confirm('¿Confirmas la eliminación? Esta acción no se puede deshacer.');">
+    <input type="hidden" name="confirmar" value="1">
+    <button type="submit" class="btn btn-danger btn-sm">{{ texto }}</button>
+  </form>
+{% endmacro %}
+
+{# Fila de campo en detalle #}
+{% macro campo(label, value, mono=false) %}
+  <div style="display:flex; gap:8px; align-items:baseline; padding:10px 0; border-bottom:1px solid var(--rule-dark);">
+    <span class="text-sm font-medium text-steel" style="min-width:180px; flex-shrink:0;">{{ label }}</span>
+    <span class="text-sm {% if mono %}tabular{% endif %}">{{ value if value else '—' }}</span>
+  </div>
+{% endmacro %}
+
+{# Empty state para tablas #}
+{% macro empty_table(mensaje='Sin registros.') %}
+  <div class="empty-state" style="padding:36px 20px;">
+    <div class="empty-state-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="empty-state-title">{{ mensaje }}</div>
+  </div>
+{% endmacro %}

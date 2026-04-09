@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, campo %}
+
+{% block title %}Actualizar factura{% endblock %}
+{% block page_title %}Actualizar — {{ factura_base.numero_factura }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('facturas.listar_facturas') }}">Facturas</a>
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('facturas.detalle_factura', factura_id=factura_id) }}">{{ factura_base.numero_factura }}</a>
+  <span class="topbar-sep">/</span>
+  <span>Actualizar</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Resumen de la factura (solo lectura) -->
+<div class="card" style="max-width:720px; margin-bottom:20px;">
+  <div class="card-header">
+    <div class="card-title">Resumen de factura</div>
+    {{ badge_estado(factura_base.estado) }}
+  </div>
+  <div class="card-body">
+    {{ campo('N° Factura', factura_base.numero_factura, mono=true) }}
+    {{ campo('Cliente', factura_base.cliente) }}
+    {{ campo('Total', '$' ~ "{:,.2f}".format(factura_base.total | float)) }}
+    {{ campo('Fecha emisión', factura_base.fecha_emision.strftime('%d/%m/%Y') if factura_base.fecha_emision else '—') }}
+  </div>
+</div>
+
+<!-- Formulario de actualización -->
+<div class="card" style="max-width:720px;">
+  <div class="card-header">
+    <div class="card-title">Actualizar estado de pago</div>
+    <span class="text-sm text-steel">Solo se puede modificar el estado y la fecha de pago</span>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('facturas.editar_factura', factura_id=factura_id) }}">
+
+      <div class="form-grid" style="margin-bottom:24px;">
+        <div class="form-group">
+          <label class="form-label">Estado <span class="text-amber">*</span></label>
+          <select name="estado" class="form-control" required>
+            {% for est in estados %}
+            <option value="{{ est }}" {% if factura.estado == est %}selected{% endif %}>{{ est | title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha de pago</label>
+          <input type="date" name="fecha_pago" class="form-control" value="{{ factura.fecha_pago }}">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{{ url_for('facturas.detalle_factura', factura_id=factura_id) }}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

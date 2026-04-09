@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, empty_table %}
+
+{% block title %}Órdenes de Servicio{% endblock %}
+{% block page_title %}Órdenes de Servicio{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Órdenes</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('ordenes.nueva_orden') }}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nueva orden
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Todas las órdenes <span class="text-muted font-normal">({{ ordenes | length }})</span></div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if ordenes %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>N° Orden</th>
+            <th>Cliente</th>
+            <th>Ruta</th>
+            <th>Vehículo</th>
+            <th>Conductor</th>
+            <th class="text-right">Peso (kg)</th>
+            <th class="text-right">Facturado</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in ordenes %}
+          <tr>
+            <td class="tabular text-sm font-semibold">{{ o.numero_orden }}</td>
+            <td class="text-sm">{{ o.cliente }}</td>
+            <td class="text-sm">{{ o.ruta }}</td>
+            <td class="tabular text-sm">{{ o.vehiculo }}</td>
+            <td class="text-sm">{{ o.conductor }}</td>
+            <td class="tabular text-sm text-right">{{ "{:,.1f}".format(o.peso_kg | float) }}</td>
+            <td class="tabular text-sm text-right">
+              {% if o.monto_facturado %} ${{ "{:,.2f}".format(o.monto_facturado | float) }} {% else %} — {% endif %}
+            </td>
+            <td class="tabular text-sm">{{ o.fecha_programada.strftime('%d/%m/%Y') if o.fecha_programada else '—' }}</td>
+            <td>{{ badge_estado(o.estado) }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('ordenes.detalle_orden', orden_id=o.id_orden) }}" class="btn btn-ghost btn-sm">Ver</a>
+              <a href="{{ url_for('ordenes.editar_orden', orden_id=o.id_orden) }}" class="btn btn-ghost btn-sm">Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      {{ empty_table('No hay órdenes registradas.') }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

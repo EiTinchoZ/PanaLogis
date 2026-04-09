@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, campo %}
+
+{% block title %}{{ factura.numero_factura }}{% endblock %}
+{% block page_title %}{{ factura.numero_factura }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('facturas.listar_facturas') }}">Facturas</a>
+  <span class="topbar-sep">/</span>
+  <span>{{ factura.numero_factura }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  {% if factura.estado == 'PENDIENTE' %}
+  <a href="{{ url_for('facturas.editar_factura', factura_id=factura.id_factura) }}" class="btn btn-secondary btn-sm">Actualizar estado</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="align-items:start;">
+
+  <!-- Datos de factura -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Factura</div>
+      {{ badge_estado(factura.estado) }}
+    </div>
+    <div class="card-body">
+      {{ campo('N° Factura', factura.numero_factura, mono=true) }}
+      {{ campo('N° Orden', factura.numero_orden, mono=true) }}
+      {{ campo('Fecha emisión', factura.fecha_emision.strftime('%d/%m/%Y') if factura.fecha_emision else '—') }}
+      {% if factura.fecha_pago %}
+      {{ campo('Fecha pago', factura.fecha_pago.strftime('%d/%m/%Y')) }}
+      {% endif %}
+
+      <div style="border-top:2px solid var(--rule); margin:16px 0 8px;"></div>
+
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:6px 0;">
+        <span class="text-sm font-medium text-steel">Subtotal</span>
+        <span class="tabular text-sm">${{ "{:,.2f}".format(factura.subtotal | float) }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:6px 0;">
+        <span class="text-sm font-medium text-steel">ITBMS (7%)</span>
+        <span class="tabular text-sm">${{ "{:,.2f}".format(factura.impuesto | float) }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-top:1px solid var(--rule-dark); margin-top:4px;">
+        <span class="font-semibold">Total</span>
+        <span class="tabular font-bold text-lg">${{ "{:,.2f}".format(factura.total | float) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datos de orden + cliente -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">Orden de origen</div></div>
+    <div class="card-body">
+      {{ campo('Cliente', factura.cliente) }}
+      {{ campo('Ruta', factura.ruta) }}
+      {{ campo('Fecha programada', factura.fecha_programada.strftime('%d/%m/%Y') if factura.fecha_programada else '—') }}
+      <div style="margin-top:16px;">
+        <a href="{{ url_for('ordenes.detalle_orden', orden_id=factura.id_orden) }}" class="btn btn-ghost btn-sm">Ver orden</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

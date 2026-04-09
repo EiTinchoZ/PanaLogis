@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, empty_table %}
+
+{% block title %}Mantenimiento{% endblock %}
+{% block page_title %}Mantenimiento{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Mantenimiento</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('mantenimiento.nuevo_mantenimiento') }}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Registrar mantenimiento
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Registro de mantenimientos <span class="text-muted font-normal">({{ mantenimientos | length }})</span></div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if mantenimientos %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Vehículo</th>
+            <th>Tipo</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Taller</th>
+            <th class="text-right">Costo</th>
+            <th>Estado</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in mantenimientos %}
+          <tr>
+            <td class="font-medium text-sm">{{ m.placa }} <span class="text-steel">{{ m.marca }} {{ m.modelo }}</span></td>
+            <td>{{ badge_estado(m.tipo) }}</td>
+            <td class="tabular text-sm">{{ m.fecha_inicio.strftime('%d/%m/%Y') if m.fecha_inicio else '—' }}</td>
+            <td class="tabular text-sm">{{ m.fecha_fin.strftime('%d/%m/%Y') if m.fecha_fin else '—' }}</td>
+            <td class="text-sm">{{ m.taller or '—' }}</td>
+            <td class="tabular text-sm text-right">
+              {% if m.costo %}${{ "{:,.2f}".format(m.costo | float) }}{% else %}—{% endif %}
+            </td>
+            <td>{{ badge_estado(m.estado) }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('mantenimiento.detalle_mantenimiento', mantenimiento_id=m.id_mantenimiento) }}" class="btn btn-ghost btn-sm">Ver</a>
+              <a href="{{ url_for('mantenimiento.editar_mantenimiento', mantenimiento_id=m.id_mantenimiento) }}" class="btn btn-ghost btn-sm">Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      {{ empty_table('No hay mantenimientos registrados.') }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

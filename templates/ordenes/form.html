@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if modo == 'editar' else 'Nueva' }} Orden{% endblock %}
+{% block page_title %}{{ 'Editar orden' if modo == 'editar' else 'Nueva orden de servicio' }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('ordenes.listar_ordenes') }}">Ordenes</a>
+  {% if modo == 'editar' %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('ordenes.detalle_orden', orden_id=orden_id) }}">{{ numero_orden }}</a>
+  {% endif %}
+  <span class="topbar-sep">/</span>
+  <span>{{ 'Editar' if modo == 'editar' else 'Nueva' }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:860px;">
+  <div class="card-header">
+    <div class="card-title">
+      {% if modo == 'editar' %}Editar orden {{ numero_orden }}{% else %}Nueva orden de servicio{% endif %}
+    </div>
+    {% if modo == 'nuevo' %}
+    <span class="text-sm text-steel">Creacion via <code style="font-family:var(--font-mono);font-size:12px;background:var(--mist);padding:2px 6px;border-radius:4px;">sp_crear_orden</code></span>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <form method="POST"
+          action="{{ url_for('ordenes.editar_orden', orden_id=orden_id) if modo == 'editar' else url_for('ordenes.nueva_orden') }}">
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Cliente <span class="text-amber">*</span></label>
+          <select name="id_cliente" class="form-control" required>
+            <option value="">Seleccionar cliente...</option>
+            {% for c in clientes %}
+            <option value="{{ c.id_cliente }}"
+              {% if orden.id_cliente | string == c.id_cliente | string %}selected{% endif %}>
+              {{ c.razon_social }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ruta <span class="text-amber">*</span></label>
+          <select name="id_ruta" class="form-control" required>
+            <option value="">Seleccionar ruta...</option>
+            {% for r in rutas %}
+            <option value="{{ r.id_ruta }}"
+              {% if orden.id_ruta | string == r.id_ruta | string %}selected{% endif %}>
+              {{ r.nombre }} - {{ r.origen }} -> {{ r.destino }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Vehiculo <span class="text-amber">*</span></label>
+          <select name="id_vehiculo" class="form-control" required>
+            <option value="">Seleccionar vehiculo...</option>
+            {% for v in vehiculos %}
+            {% set vehiculo_seleccionado = orden.id_vehiculo | string == v.id_vehiculo | string %}
+            {% set vehiculo_habilitado = v.disponible or vehiculo_seleccionado %}
+            <option value="{{ v.id_vehiculo }}"
+              {% if vehiculo_seleccionado %}selected{% endif %}
+              {% if not vehiculo_habilitado %}disabled{% endif %}>
+              {{ v.placa }} - {{ v.marca }} {{ v.modelo }}{% if not vehiculo_habilitado %} ({{ v.disponibilidad }}){% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Conductor <span class="text-amber">*</span></label>
+          <select name="id_conductor" class="form-control" required>
+            <option value="">Seleccionar conductor...</option>
+            {% for c in conductores %}
+            {% set conductor_seleccionado = orden.id_conductor | string == c.id_conductor | string %}
+            {% set conductor_habilitado = c.disponible or conductor_seleccionado %}
+            <option value="{{ c.id_conductor }}"
+              {% if conductor_seleccionado %}selected{% endif %}
+              {% if not conductor_habilitado %}disabled{% endif %}>
+              {{ c.nombre }} {{ c.apellido }} ({{ c.cedula }}){% if not conductor_habilitado %} - {{ c.disponibilidad }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Tipo de carga <span class="text-amber">*</span></label>
+          <select name="id_tipo_carga" class="form-control" required>
+            <option value="">Seleccionar tipo...</option>
+            {% for tc in tipos_carga %}
+            <option value="{{ tc.id_tipo_carga }}"
+              {% if orden.id_tipo_carga | string == tc.id_tipo_carga | string %}selected{% endif %}>
+              {{ tc.nombre }}{% if tc.refrigeracion %} - Refrigerado{% endif %}{% if tc.es_peligrosa %} - Peligroso{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Peso (kg) <span class="text-amber">*</span></label>
+          <input type="number" name="peso_kg" class="form-control" value="{{ orden.peso_kg }}"
+                 min="0.01" step="0.01" placeholder="0.00" required>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Fecha programada <span class="text-amber">*</span></label>
+          <input type="date" name="fecha_programada" class="form-control" value="{{ orden.fecha_programada }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          {% if modo == 'editar' %}
+          <select name="estado" class="form-control">
+            {% for est in estados %}
+            <option value="{{ est }}" {% if orden.estado == est %}selected{% endif %}>{{ est | replace('_', ' ') | title }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <input type="text" class="form-control" value="Pendiente" disabled>
+          <input type="hidden" name="estado" value="PENDIENTE">
+          <div class="text-xs text-steel" style="margin-top:6px;">Las nuevas ordenes se crean en estado pendiente desde el procedimiento almacenado.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Descripcion de la carga</label>
+        <textarea name="descripcion" class="form-control" rows="2" placeholder="Descripcion detallada de los bienes a transportar...">{{ orden.descripcion }}</textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label">Observaciones</label>
+        <textarea name="observaciones" class="form-control" rows="2" placeholder="Instrucciones especiales, condiciones de entrega...">{{ orden.observaciones }}</textarea>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">
+          {{ 'Guardar cambios' if modo == 'editar' else 'Crear orden' }}
+        </button>
+        <a href="{{ url_for('ordenes.detalle_orden', orden_id=orden_id) if modo == 'editar' else url_for('ordenes.listar_ordenes') }}"
+           class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

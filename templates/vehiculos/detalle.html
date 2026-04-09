@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, btn_eliminar, campo %}
+
+{% block title %}{{ vehiculo.placa }}{% endblock %}
+{% block page_title %}{{ vehiculo.placa }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('vehiculos.listar_vehiculos') }}">Flota</a>
+  <span class="topbar-sep">/</span>
+  <span>{{ vehiculo.placa }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('vehiculos.editar_vehiculo', vehiculo_id=vehiculo.id_vehiculo) }}" class="btn btn-secondary btn-sm">Editar</a>
+  {{ btn_eliminar(url_for('vehiculos.eliminar_vehiculo', vehiculo_id=vehiculo.id_vehiculo)) }}
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="margin-bottom:24px; align-items:start;">
+
+  <!-- Info principal -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Información del vehículo</div>
+      {{ badge_estado(vehiculo.estado) }}
+    </div>
+    <div class="card-body">
+      {{ campo('Placa', vehiculo.placa, mono=true) }}
+      {{ campo('Tipo', vehiculo.tipo_vehiculo) }}
+      {{ campo('Marca', vehiculo.marca) }}
+      {{ campo('Modelo', vehiculo.modelo) }}
+      {{ campo('Año', vehiculo.anio) }}
+      {{ campo('Capacidad', vehiculo.capacidad_ton ~ ' toneladas') }}
+      {{ campo('Kilometraje', "{:,.0f} km".format(vehiculo.kilometraje | float)) }}
+    </div>
+  </div>
+
+  <!-- Historial de mantenimientos -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Mantenimientos recientes</div>
+      <a href="{{ url_for('mantenimiento.nuevo_mantenimiento') }}" class="btn btn-ghost btn-sm">+ Nuevo</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if mantenimientos %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Inicio</th>
+            <th>Estado</th>
+            <th class="text-right">Costo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in mantenimientos %}
+          <tr>
+            <td class="text-sm">{{ m.tipo | title }}</td>
+            <td class="tabular text-sm">{{ m.fecha_inicio.strftime('%d/%m/%Y') if m.fecha_inicio else '—' }}</td>
+            <td>{{ badge_estado(m.estado) }}</td>
+            <td class="tabular text-sm text-right">
+              {% if m.costo %}${{ "{:,.2f}".format(m.costo | float) }}{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:24px 20px; text-align:center;" class="text-sm text-steel">
+        Sin mantenimientos registrados.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

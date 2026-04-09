@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if modo == 'editar' else 'Nuevo' }} Vehículo{% endblock %}
+{% block page_title %}{{ 'Editar vehículo' if modo == 'editar' else 'Nuevo vehículo' }}{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('vehiculos.listar_vehiculos') }}">Flota</a>
+  {% if modo == 'editar' %}
+  <span class="topbar-sep">/</span>
+  <a href="{{ url_for('vehiculos.detalle_vehiculo', vehiculo_id=vehiculo_id) }}">{{ vehiculo.placa }}</a>
+  {% endif %}
+  <span class="topbar-sep">/</span>
+  <span>{{ 'Editar' if modo == 'editar' else 'Nuevo' }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:720px;">
+  <div class="card-header">
+    <div class="card-title">Datos del vehículo</div>
+  </div>
+  <div class="card-body">
+    <form method="POST"
+          action="{{ url_for('vehiculos.editar_vehiculo', vehiculo_id=vehiculo_id) if modo == 'editar' else url_for('vehiculos.nuevo_vehiculo') }}">
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Placa <span class="text-amber">*</span></label>
+          <input type="text" name="placa" class="form-control"
+                 value="{{ vehiculo.placa }}" placeholder="ABC-1234" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de vehículo <span class="text-amber">*</span></label>
+          <select name="id_tipo_vehiculo" class="form-control" required>
+            <option value="">Seleccionar tipo...</option>
+            {% for tipo in tipos_vehiculo %}
+            <option value="{{ tipo.id_tipo_vehiculo }}"
+              {% if vehiculo.id_tipo_vehiculo | string == tipo.id_tipo_vehiculo | string %}selected{% endif %}>
+              {{ tipo.descripcion }} ({{ tipo.capacidad_ton }} t)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Marca <span class="text-amber">*</span></label>
+          <input type="text" name="marca" class="form-control"
+                 value="{{ vehiculo.marca }}" placeholder="Ej. Mercedes-Benz" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Modelo <span class="text-amber">*</span></label>
+          <input type="text" name="modelo" class="form-control"
+                 value="{{ vehiculo.modelo }}" placeholder="Ej. Actros" required>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Año <span class="text-amber">*</span></label>
+          <input type="number" name="anio" class="form-control"
+                 value="{{ vehiculo.anio }}" min="1980" max="2026" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kilometraje (km)</label>
+          <input type="number" name="kilometraje" class="form-control"
+                 value="{{ vehiculo.kilometraje }}" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label">Estado <span class="text-amber">*</span></label>
+        <select name="estado" class="form-control" required>
+          {% for est in estados %}
+          <option value="{{ est }}" {% if vehiculo.estado == est %}selected{% endif %}>{{ est | replace('_',' ') | title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary">
+          {{ 'Guardar cambios' if modo == 'editar' else 'Registrar vehículo' }}
+        </button>
+        <a href="{{ url_for('vehiculos.detalle_vehiculo', vehiculo_id=vehiculo_id) if modo == 'editar' else url_for('vehiculos.listar_vehiculos') }}"
+           class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

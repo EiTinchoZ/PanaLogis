@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, btn_eliminar, empty_table %}
+
+{% block title %}Flota{% endblock %}
+{% block page_title %}Flota de Vehículos{% endblock %}
+
+{% block breadcrumb %}
+  <span class="topbar-sep">/</span>
+  <span>Flota</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{{ url_for('vehiculos.nuevo_vehiculo') }}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nuevo vehículo
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Todos los vehículos <span class="text-muted font-normal">({{ vehiculos | length }})</span></div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if vehiculos %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Tipo</th>
+            <th>Marca / Modelo</th>
+            <th>Año</th>
+            <th class="text-right">Km</th>
+            <th class="text-right">Cap. (t)</th>
+            <th>Estado</th>
+            <th class="col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vehiculos %}
+          <tr>
+            <td class="font-semibold tabular">{{ v.placa }}</td>
+            <td class="text-sm">{{ v.tipo_vehiculo }}</td>
+            <td class="text-sm">{{ v.marca }} {{ v.modelo }}</td>
+            <td class="tabular text-sm">{{ v.anio }}</td>
+            <td class="tabular text-sm text-right">{{ "{:,.0f}".format(v.kilometraje | float) }}</td>
+            <td class="tabular text-sm text-right">{{ v.capacidad_ton }}</td>
+            <td>{{ badge_estado(v.estado) }}</td>
+            <td class="col-actions">
+              <a href="{{ url_for('vehiculos.detalle_vehiculo', vehiculo_id=v.id_vehiculo) }}" class="btn btn-ghost btn-sm">Ver</a>
+              <a href="{{ url_for('vehiculos.editar_vehiculo', vehiculo_id=v.id_vehiculo) }}" class="btn btn-ghost btn-sm">Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      {{ empty_table('No hay vehículos registrados.') }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
