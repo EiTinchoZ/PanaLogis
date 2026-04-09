@@ -15,16 +15,5 @@
       "src": "/(.*)",
       "dest": "/api/index.py"
     }
-  ],
-  "env": {
-    "PANALOGIS_DB_ENGINE": "@panalogis_db_engine",
-    "PANALOGIS_DB_URL": "@panalogis_db_url",
-    "PANALOGIS_DB_HOST": "@panalogis_db_host",
-    "PANALOGIS_DB_PORT": "@panalogis_db_port",
-    "PANALOGIS_DB_USER": "@panalogis_db_user",
-    "PANALOGIS_DB_PASSWORD": "@panalogis_db_password",
-    "PANALOGIS_DB_NAME": "@panalogis_db_name",
-    "PANALOGIS_DB_SSLMODE": "@panalogis_db_sslmode",
-    "SECRET_KEY": "@panalogis_secret_key"
-  }
+  ]
 }
