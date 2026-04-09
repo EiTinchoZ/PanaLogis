@@ -787,3 +787,60 @@ No avances más allá de esta tarea sin instrucciones de Claude Code.
 - Completar cédulas en la portada del informe (campo: "________________")
 - Verificar que Groq funcione ahora en su red: `pip install requests` si no está instalado
 - Imprimir informe_final.html a PDF via navegador (Ctrl+P)
+ 
+---
+
+## Sesión 17 — 9 de abril de 2026 — Agente: Codex
+
+### ¿Qué se hizo?
+- Lectura completa de `AGENTS.md`, `CLAUDE.md` y del archivo externo `C:\Users\mbund\Escritorio\claude code sesion 5.txt` para reconstruir el punto exacto donde Claude Code quedó por límite
+- Confirmación de que Claude no alcanzó a implementar la migración a hosting gratis; solo dejó decidido el cambio de dirección hacia Supabase para resolver el deploy en Vercel
+- Revisión del estado real del repo para separar lo ya existente (`api/index.py`, `vercel.json`, soporte parcial en `config.py`) de lo que seguía faltando
+- Consolidación del backend para conexión dual `MySQL local` + `PostgreSQL/Supabase` sin romper el flujo académico original del proyecto
+- Endurecimiento de `routes/_helpers.py` para manejar errores SQL de PostgreSQL/Supabase además de MariaDB
+- Adaptación de las rutas que dependían de `callproc()` / `stored_results()` e incompatibilidades SQL (`IFNULL`, `YEAR`, `MONTH`) para que funcionen en ambos motores
+- Creación de `database/supabase_postgres.sql` con:
+  esquema PostgreSQL equivalente
+  tipos `ENUM` adaptados
+  triggers equivalentes
+  función `sp_crear_orden(...)`
+  función `sp_rentabilidad_ruta(...)`
+  dataset demo operativo
+- Actualización de `README.md`, `requirements.txt` y `vercel.json` para documentar el deploy gratis en Supabase + Vercel
+
+### Archivos creados o modificados
+- `config.py`
+- `routes/_helpers.py`
+- `routes/clientes.py`
+- `routes/ordenes.py`
+- `routes/reportes.py`
+- `database/supabase_postgres.sql`
+- `requirements.txt`
+- `vercel.json`
+- `README.md`
+
+### Decisiones tomadas y por qué
+- Se mantuvo `database/panalogis.sql` como base oficial del proyecto para respetar la rúbrica académica MySQL/MariaDB
+- Se añadió `database/supabase_postgres.sql` como adapter de hosting, en lugar de reemplazar el SQL oficial, para no reescribir la narrativa académica del proyecto
+- La conexión dual se dejó por variable de entorno (`PANALOGIS_DB_ENGINE`, `PANALOGIS_DB_URL`) para que local siga en MySQL por defecto y Vercel pueda entrar a Supabase sin forks del código
+- Se reemplazó `IFNULL` por `COALESCE` y `YEAR/MONTH` por `EXTRACT(...)` en los puntos necesarios porque son equivalentes funcionales y reducen divergencias entre motores
+- `sp_crear_orden` y `sp_rentabilidad_ruta` se abstrajeron en helpers compartidos para encapsular la diferencia entre stored procedures MySQL y funciones PostgreSQL
+
+### Verificación realizada
+- `python -m py_compile app.py config.py routes\_helpers.py routes\vehiculos.py routes\conductores.py routes\clientes.py routes\ordenes.py routes\mantenimiento.py routes\facturas.py routes\reportes.py routes\ai.py services\ai_service.py tests\runtime_smoke.py api\index.py`
+- `python tests\runtime_smoke.py`
+  Resultado: **12 tests OK**
+
+### Estado tras esta sesión
+- El proyecto sigue operativo y verificado en MySQL local
+- El repo ya tiene la ruta técnica para deploy gratis en Vercel usando Supabase
+- Sigue pendiente la validación contra un proyecto Supabase real con credenciales del usuario, porque en esta sesión no se proporcionaron
+
+### Próximos pasos
+- Crear el proyecto Supabase del usuario y ejecutar `database/supabase_postgres.sql` en el SQL Editor
+- Configurar en Vercel al menos:
+  `PANALOGIS_DB_ENGINE=postgres`
+  `PANALOGIS_DB_URL=<connection string Supabase>`
+  `PANALOGIS_DB_SSLMODE=require`
+  `SECRET_KEY=<valor seguro>`
+- Hacer un deploy real y comprobar que dashboard, reportes y alta de órdenes funcionan en cloud

@@ -113,7 +113,7 @@ La característica técnica central del proyecto es que **toda la lógica de neg
 
 **Deployment:**
 - **Frontend + Backend:** Vercel (Python serverless)
-- **Base de datos:** TiDB Cloud Serverless / Railway MySQL (cloud)
+- **Base de datos cloud:** Supabase Postgres (adapter de deploy)
 - **Local:** XAMPP (MariaDB) + Python
 
 ---
@@ -197,14 +197,15 @@ python tests/runtime_smoke.py
 
 ## Deploy en Vercel
 
-PanaLogis está configurado para desplegarse en Vercel con un MySQL cloud. El proceso toma menos de 10 minutos.
+PanaLogis está configurado para desplegarse en Vercel con Supabase como base de datos cloud gratuita. El proyecto mantiene MariaDB/MySQL como base oficial local y usa PostgreSQL solo como adapter de hosting para la demo online.
 
-### 1. Base de datos cloud (TiDB Cloud — gratis, sin tarjeta)
+### 1. Crear la base en Supabase
 
-1. Crear cuenta en [tidbcloud.com](https://tidbcloud.com) → **Free Tier**
-2. Crear un cluster Serverless
-3. En el dashboard del cluster → **Connect** → copiar los datos de conexión
-4. Importar el schema: en el SQL Editor de TiDB Cloud, pegar y ejecutar el contenido de `database/panalogis.sql`
+1. Crear cuenta en [supabase.com](https://supabase.com) → plan gratuito
+2. Crear un proyecto nuevo y esperar a que la base quede activa
+3. Abrir **SQL Editor**
+4. Ejecutar completo el archivo `database/supabase_postgres.sql`
+5. Ir a **Project Settings → Database** y copiar la connection string o los datos de host/port/user/password/database
 
 ### 2. Deploy en Vercel
 
@@ -220,11 +221,17 @@ npm i -g vercel
 vercel
 
 # Configurar variables de entorno en vercel.com → Project → Settings → Environment Variables:
-# PANALOGIS_DB_HOST     → host de TiDB Cloud
-# PANALOGIS_DB_PORT     → puerto (generalmente 4000 en TiDB)
-# PANALOGIS_DB_USER     → usuario de TiDB
-# PANALOGIS_DB_PASSWORD → contraseña de TiDB
-# PANALOGIS_DB_NAME     → panalogis_db
+# PANALOGIS_DB_ENGINE   → postgres
+# PANALOGIS_DB_URL      → connection string de Supabase (recomendado)
+# PANALOGIS_DB_SSLMODE  → require
+# SECRET_KEY            → cualquier string largo y aleatorio
+#
+# Alternativa sin URL:
+# PANALOGIS_DB_HOST
+# PANALOGIS_DB_PORT
+# PANALOGIS_DB_USER
+# PANALOGIS_DB_PASSWORD
+# PANALOGIS_DB_NAME
 # SECRET_KEY            → cualquier string largo y aleatorio
 ```
 
@@ -378,7 +385,7 @@ Los triggers y stored procedures garantizan integridad sin importar qué interfa
 
 **¿Por qué MariaDB/MySQL y no PostgreSQL?**
 
-El stack fue definido por los requerimientos académicos (XAMPP + MariaDB). El código está escrito para ser 100% compatible con MySQL 8.x y TiDB Cloud Serverless, sin dependencias de características exclusivas de MariaDB.
+El stack fue definido por los requerimientos académicos (XAMPP + MariaDB). Por eso el archivo oficial del proyecto sigue siendo `database/panalogis.sql` y el flujo local usa MySQL/MariaDB. PostgreSQL aparece solo como adapter de deploy para Supabase, con un script paralelo (`database/supabase_postgres.sql`) que permite publicar la demo gratis sin alterar la rúbrica académica del proyecto.
 
 **¿Por qué Flask y no FastAPI/Django?**
 

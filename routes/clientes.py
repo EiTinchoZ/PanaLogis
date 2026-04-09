@@ -56,7 +56,7 @@ def _obtener_historial_cliente(connection, cliente_id):
                 o.fecha_programada,
                 o.estado,
                 r.nombre AS ruta,
-                IFNULL(f.total, 0) AS total_facturado
+                COALESCE(f.total, 0) AS total_facturado
             FROM ORDEN_SERVICIO o
             INNER JOIN RUTA r ON r.id_ruta = o.id_ruta
             LEFT JOIN FACTURA f ON f.id_orden = o.id_orden

@@ -1,7 +1,10 @@
+import warnings
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 from flask import flash
+
+from config import get_db_engine
 
 
 def parse_text(value, upper=False):
@@ -71,16 +74,17 @@ def require_confirmation(form, message="Debes confirmar la eliminación antes de
 def handle_db_exception(exc):
     message = str(exc)
     errno = getattr(exc, "errno", None)
+    pgcode = getattr(exc, "pgcode", None)
 
-    if "45000" in message or "1644" in message:
+    if "45000" in message or "1644" in message or pgcode == "P0001":
         flash(message, "error")
         return True
 
-    if errno == 1062:
+    if errno == 1062 or pgcode == "23505":
         flash("Ya existe un registro con un valor único duplicado.", "error")
         return True
 
-    if errno in {1451, 1452}:
+    if errno in {1451, 1452} or pgcode == "23503":
         flash(
             "La operación no puede completarse porque el registro tiene relaciones activas en la base de datos.",
             "error",
@@ -88,3 +92,64 @@ def handle_db_exception(exc):
         return True
 
     return False
+
+
+def call_sp_crear_orden(cursor, orden):
+    params = [
+        orden["fecha_programada"],
+        orden["id_cliente"],
+        orden["id_ruta"],
+        orden["id_vehiculo"],
+        orden["id_conductor"],
+        orden["id_tipo_carga"],
+        orden["peso_kg"],
+        orden["descripcion"] or None,
+    ]
+
+    if get_db_engine() == "postgres":
+        cursor.execute(
+            """
+            SELECT numero_orden, mensaje
+            FROM sp_crear_orden(%s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            params,
+        )
+        row = cursor.fetchone() or {}
+        return row.get("numero_orden"), row.get("mensaje")
+
+    resultado = cursor.callproc("sp_crear_orden", [*params, "", ""])
+    if isinstance(resultado, dict):
+        return resultado.get("sp_crear_orden_arg9"), resultado.get("sp_crear_orden_arg10")
+    return resultado[8], resultado[9]
+
+
+def fetch_sp_rentabilidad_ruta(cursor, anio, mes):
+    if get_db_engine() == "postgres":
+        cursor.execute(
+            "SELECT * FROM sp_rentabilidad_ruta(%s, %s)",
+            (anio, mes),
+        )
+        return cursor.fetchall()
+
+    cursor.callproc("sp_rentabilidad_ruta", [anio, mes])
+    stored_results = getattr(cursor, "stored_results")
+    if callable(stored_results):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            result_sets = list(stored_results())
+    else:
+        result_sets = list(stored_results)
+
+    for result in result_sets:
+        rows = result.fetchall()
+        if rows:
+            return rows
+    return []
+
+
+def call_create_order(cursor, orden):
+    return call_sp_crear_orden(cursor, orden)
+
+
+def fetch_rentabilidad_rows(cursor, anio, mes):
+    return fetch_sp_rentabilidad_ruta(cursor, anio, mes)

@@ -1,10 +1,9 @@
-import warnings
 from datetime import date
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from config import get_db_connection
-from routes._helpers import parse_text, require_confirmation
+from routes._helpers import fetch_sp_rentabilidad_ruta, parse_text, require_confirmation
 
 
 reportes_bp = Blueprint("reportes", __name__)
@@ -23,25 +22,6 @@ def _parse_optional_int(raw_value, minimum=None, maximum=None):
     if maximum is not None and parsed > maximum:
         return None
     return parsed
-
-
-def _fetch_callproc_rows(cursor, procedure_name, params):
-    cursor.callproc(procedure_name, params)
-    stored_results = getattr(cursor, "stored_results")
-
-    if callable(stored_results):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            result_sets = list(stored_results())
-    else:
-        result_sets = list(stored_results)
-
-    for result in result_sets:
-        rows = result.fetchall()
-        if rows:
-            return rows
-    return []
-
 
 @reportes_bp.get("/")
 def listar_reportes():
@@ -103,7 +83,7 @@ def listar_reportes():
                 r.nombre AS ruta,
                 o.fecha_programada,
                 o.estado,
-                IFNULL(CASE WHEN f.estado = 'ANULADA' THEN 0 ELSE f.total END, 0) AS monto_facturado
+                COALESCE(CASE WHEN f.estado = 'ANULADA' THEN 0 ELSE f.total END, 0) AS monto_facturado
             FROM CLIENTE cl
             INNER JOIN ORDEN_SERVICIO o ON o.id_cliente = cl.id_cliente
             INNER JOIN RUTA r ON r.id_ruta = o.id_ruta
@@ -114,11 +94,7 @@ def listar_reportes():
         historial_clientes = cursor.fetchall()
 
         # Q4: Rentabilidad por ruta
-        rentabilidad_ruta = _fetch_callproc_rows(
-            cursor,
-            "sp_rentabilidad_ruta",
-            [filtros["anio"], filtros["mes"]],
-        )
+        rentabilidad_ruta = fetch_sp_rentabilidad_ruta(cursor, filtros["anio"], filtros["mes"])
 
         # Q5: Alertas de mantenimiento activo
         cursor.execute(
@@ -163,8 +139,8 @@ def listar_reportes():
         cursor.execute(
             """
             SELECT
-                YEAR(f.fecha_emision) AS anio,
-                MONTH(f.fecha_emision) AS mes,
+                EXTRACT(YEAR FROM f.fecha_emision) AS anio,
+                EXTRACT(MONTH FROM f.fecha_emision) AS mes,
                 SUM(CASE WHEN f.estado <> 'ANULADA' THEN 1 ELSE 0 END) AS total_facturas,
                 SUM(CASE WHEN f.estado <> 'ANULADA' THEN f.subtotal ELSE 0 END) AS ingresos_netos,
                 SUM(CASE WHEN f.estado <> 'ANULADA' THEN f.impuesto ELSE 0 END) AS itbms,

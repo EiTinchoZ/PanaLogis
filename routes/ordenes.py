@@ -4,6 +4,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from config import get_db_connection
 from routes._helpers import (
+    call_sp_crear_orden,
     handle_db_exception,
     parse_date_field,
     parse_decimal_field,
@@ -320,7 +321,7 @@ def listar_ordenes():
                 r.nombre AS ruta,
                 v.placa AS vehiculo,
                 CONCAT(d.nombre, ' ', d.apellido) AS conductor,
-                IFNULL(f.total, 0) AS monto_facturado
+                COALESCE(f.total, 0) AS monto_facturado
             FROM ORDEN_SERVICIO o
             INNER JOIN CLIENTE c ON c.id_cliente = o.id_cliente
             INNER JOIN RUTA r ON r.id_ruta = o.id_ruta
@@ -375,27 +376,7 @@ def nueva_orden():
             else:
                 cursor = connection.cursor()
                 try:
-                    resultado = cursor.callproc(
-                        "sp_crear_orden",
-                        [
-                            orden["fecha_programada"],
-                            orden["id_cliente"],
-                            orden["id_ruta"],
-                            orden["id_vehiculo"],
-                            orden["id_conductor"],
-                            orden["id_tipo_carga"],
-                            orden["peso_kg"],
-                            orden["descripcion"] or None,
-                            "",
-                            "",
-                        ],
-                    )
-                    if isinstance(resultado, dict):
-                        numero_orden = resultado.get("sp_crear_orden_arg9")
-                        mensaje = resultado.get("sp_crear_orden_arg10")
-                    else:
-                        numero_orden = resultado[8]
-                        mensaje = resultado[9]
+                    numero_orden, mensaje = call_sp_crear_orden(cursor, orden)
                     if numero_orden and orden["observaciones"]:
                         cursor.execute(
                             """
