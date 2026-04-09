@@ -7,6 +7,8 @@
 -- Autores: Bundy, Herrera, De León — ITSE BD1 2026
 -- =========================================================
 
+CREATE DATABASE IF NOT EXISTS panalogis_db
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE panalogis_db;
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 
