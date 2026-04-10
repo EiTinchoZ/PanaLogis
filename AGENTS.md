@@ -844,3 +844,108 @@ No avances más allá de esta tarea sin instrucciones de Claude Code.
   `PANALOGIS_DB_SSLMODE=require`
   `SECRET_KEY=<valor seguro>`
 - Hacer un deploy real y comprobar que dashboard, reportes y alta de órdenes funcionan en cloud
+
+---
+
+## Sesión 18 — 9 de abril de 2026 — Agente: Codex
+
+### ¿Qué se hizo?
+- Auditoría completa del estado final del sistema en local y en producción antes de tocar entregables
+- Verificación de la app publicada en `https://panalogis.vercel.app`
+  - `/dashboard` → 200
+  - `/vehiculos/` → 200
+  - `/ordenes/` → 200
+  - `/reportes/` → 200
+- Reejecución de `python tests\runtime_smoke.py`
+  Resultado: **12/12 OK**
+- Auditoría de `output/informe_final.html` y `output/manual_usuario.html` contra la rúbrica real del profesor extraída del PDF de formato
+- Sustitución completa de ambos entregables para dejar una versión más profesional, más fiel a la rúbrica y lista para exportación
+- Generación de capturas reales del sistema en producción para anexos:
+  - `output/assets/dashboard.png`
+  - `output/assets/vehiculos.png`
+  - `output/assets/ordenes.png`
+  - `output/assets/reportes.png`
+- Generación de PDFs finales listos para entregar:
+  - `output/informe_final.pdf`
+  - `output/manual_usuario.pdf`
+- Validación de los PDF generados
+  - `output/informe_final.pdf` → 25 páginas
+  - `output/manual_usuario.pdf` → 10 páginas
+
+### Archivos creados o modificados
+- `output/informe_final.html`
+- `output/manual_usuario.html`
+- `output/informe_final.pdf`
+- `output/manual_usuario.pdf`
+- `output/assets/dashboard.png`
+- `output/assets/vehiculos.png`
+- `output/assets/ordenes.png`
+- `output/assets/reportes.png`
+
+### Decisiones tomadas y por qué
+- Se eliminó el enfoque anterior de “HTML bonito para luego hacer Ctrl+P” y se dejó un paquete real de entrega con PDF ya generado
+- El informe se reordenó para cubrir explícitamente:
+  diagnóstico
+  análisis
+  DER
+  modelo relacional
+  normalización
+  implementación SQL
+  pruebas
+  conclusiones
+  desafíos
+  bibliografía
+  anexos
+- Se integraron capturas reales del prototipo en anexos para cubrir mejor la exigencia de evidencia visual
+- Se mantuvo `database/panalogis.sql` como script académico oficial y se aclaró en el informe que Supabase/PostgreSQL solo se usa como adapter de hosting para la demo
+- No se inventaron cédulas faltantes; la portada quedó lista pero ese dato sigue pendiente de completarse por el equipo si el profesor lo exige
+
+### Verificación realizada
+- `python tests\runtime_smoke.py`
+  Resultado: **12 tests OK**
+- Validación HTTP de producción:
+  `https://panalogis.vercel.app/`
+  `https://panalogis.vercel.app/dashboard`
+  `https://panalogis.vercel.app/vehiculos/`
+  `https://panalogis.vercel.app/ordenes/`
+  `https://panalogis.vercel.app/reportes/`
+  todas con respuesta `200`
+- Validación PDF con extracción de texto:
+  `output/informe_final.pdf` legible
+  `output/manual_usuario.pdf` legible
+
+### Estado tras esta sesión
+- Sistema operativo en cloud y validado
+- Entregables documentales regenerados y profesionalizados
+- PDFs finales ya creados dentro de `output/`
+- Riesgo pendiente único: completar cédulas reales en portada si el profesor las pide de forma obligatoria
+
+### Próximos pasos
+- Revisar visualmente una vez más los PDF si el equipo quiere hacer un último ajuste cosmético menor
+- Completar cédulas en portada si se obtienen a tiempo
+- Entregar:
+  `output/informe_final.pdf`
+  `output/manual_usuario.pdf`
+  `database/panalogis.sql`
+
+---
+
+## Sesión 19 — 10 de abril de 2026 — Agente: Codex
+
+### ¿Qué se hizo?
+- Actualización puntual de la portada del informe final con la cédula real compartida por el usuario para Jesús De León
+- Regeneración de `output/informe_final.pdf` a partir del HTML actualizado para mantener consistencia entre fuente y entregable final
+
+### Archivos modificados
+- `output/informe_final.html`
+- `output/informe_final.pdf`
+- `AGENTS.md`
+
+### Verificación realizada
+- Confirmación directa en HTML de la fila:
+  `Jesús De León` → `8-1035-427`
+- Regeneración del PDF final sin errores
+
+### Estado tras esta sesión
+- El informe final ya incorpora la cédula de Jesús De León
+- Siguen pendientes las cédulas de los demás integrantes solo si el profesor exige la portada 100% completa
